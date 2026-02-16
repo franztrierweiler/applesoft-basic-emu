@@ -11,3 +11,7 @@ https://www.linkedin.com/posts/franztrierweiler_le-spec-driven-development-%C3%A
 
 ## Etat initial
 Créé après production de SPEC.md avec le skill sdd-spec-write (https://github.com/franztrierweiler/claude-code-skills/tree/main/skills/sdd-spec-write)
+
+## Repartir de zéro
+Utilisez le tag FRESH pour cloner un projet tout frais
+git clone --branch FRESH <le_projet>
