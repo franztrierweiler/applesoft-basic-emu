@@ -11,7 +11,7 @@ Architecture de référence : ARCHITECTURE.md v1.0
 
 L'émulateur Applesoft BASIC se déploie sous deux formes indépendantes : un interpréteur CLI Python (Phase 1) et une application web statique Brython (Phase 2). Il n'y a aucun serveur applicatif, aucune base de données, aucune infrastructure cloud à provisionner.
 
-La distribution Phase 1 repose sur `git clone` + `pip install -e .` (mode développeur), avec Docker en complément pour la reproductibilité. Le Makefile est l'interface unique pour toutes les opérations. La Phase 2 est une page HTML statique déployée automatiquement sur GitHub Pages à chaque push sur `main`.
+La distribution Phase 1 repose sur `git clone` + `pip install -e .` (mode développeur). Le Makefile est l'interface unique pour toutes les opérations. La Phase 2 est une page HTML statique déployée automatiquement sur GitHub Pages à chaque push sur `main`.
 
 **Type de solution :** CLI local + Application web statique
 
@@ -31,7 +31,6 @@ La distribution Phase 1 repose sur `git clone` + `pip install -e .` (mode dével
 | Python | 3.10.12+ | Runtime CLI, exécution des tests | `apt install python3` / `brew install python` / python.org |
 | pip | 22+ | Gestionnaire de paquets Python | Inclus avec Python |
 | Git | 2.30+ | Clonage du dépôt, CI/CD | `apt install git` / `brew install git` |
-| Docker | 24+ | Environnement reproductible (optionnel) | docs.docker.com |
 | Make | 4+ | Interface de build standard | Pré-installé Linux/macOS, `choco install make` Windows |
 
 ### 2.3 Prérequis réseau
@@ -54,7 +53,7 @@ Aucun autre secret nécessaire. Pas de clé API, pas de mot de passe, pas de cer
 
 | Environnement | Usage | Infra | Données | Accès |
 |--------------|-------|-------|---------|-------|
-| dev | Développement local | Python local ou Docker | Fichiers .bas d'exemple | Développeur |
+| dev | Développement local | Python local | Fichiers .bas d'exemple | Développeur |
 | CI | Tests automatisés | GitHub Actions (runner Ubuntu) | Fichiers .bas d'exemple | Automatique (push/PR) |
 | production (web) | App web publique | GitHub Pages | localStorage navigateur | Public |
 
@@ -75,17 +74,7 @@ make test           # pytest
 make lint           # ruff check + mypy
 ```
 
-### 4.2 Build Phase 1 (Docker)
-
-```bash
-# Construire l'image
-make docker-build   # docker build -t applesoft-basic-emu .
-
-# Lancer le REPL dans le conteneur
-make docker-run     # docker run -it applesoft-basic-emu
-```
-
-### 4.3 Build Phase 2 (Web)
+### 4.2 Build Phase 2 (Web)
 
 ```bash
 # Construire le site statique
@@ -95,12 +84,11 @@ make web-build      # Copie src/ + web/ → dist/
 make web-serve      # python -m http.server --directory dist/ 8000
 ```
 
-### 4.4 Artefacts produits
+### 4.3 Artefacts produits
 
 | Artefact | Type | Destination | Taille estimée |
 |----------|------|-------------|---------------|
 | Package Python installé | pip editable | Environnement Python local | ~100 Ko (code source) |
-| Image Docker `applesoft-basic-emu` | Image Docker | Registry local | ~150 Mo (Python slim + code) |
 | Répertoire `dist/` | Site web statique | GitHub Pages | ~500 Ko (HTML + CSS + Python + font) |
 
 ## 5. Procédure de déploiement

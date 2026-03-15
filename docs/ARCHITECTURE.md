@@ -37,7 +37,6 @@ Le choix structurant est l'Interpreter step-by-step : chaque appel à `step()` e
 | Type checking | mypy | 1.10+ | Vérification statique des interfaces (Token, AST, Environment) | Sécurise les contrats entre composants. Alternative écartée : pyright (convient aussi, mypy plus répandu) | MIT |
 | Export image | PNGWriter (custom) | — | Écriture PNG minimal en Python pur pour l'export graphique CLI | Zéro dépendance, suffisant pour 280×192. Alternative écartée : Pillow (module C natif, incompatible Brython) | — |
 | Build | Makefile | — | Interface standard pour build, test, run | Imposé par CLAUDE.md | — |
-| Conteneurisation | Docker | 24+ | Environnement de dev reproductible | Standard de facto | Apache 2.0 |
 | Hébergement Phase 2 | GitHub Pages | — | Serveur statique pour l'app web | Gratuit, zéro infra. Alternative : tout serveur statique | — |
 
 **Modules Python stdlib autorisés dans le cœur :**
