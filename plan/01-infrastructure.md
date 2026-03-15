@@ -1,6 +1,6 @@
 # EPIC 01 — Infrastructure
 
-**Statut :** ✅ Terminé (CA 04 à valider après push)
+**Statut :** ✅ Terminé
 **Priorité :** Critique (prérequis de tous les EPICs)
 **Dépendances :** Aucune
 **Référence :** ARCHITECTURE.md § 3, § 5 — DEPLOYMENT.md § 4, § 6
@@ -29,7 +29,7 @@ Mettre en place la structure du projet, l'outillage de développement et le pipe
 | CA-EPIC01-01 | `git clone` + `make install` fonctionne sur Python 3.10+ | ✅ |
 | CA-EPIC01-02 | `make test` exécute pytest sans erreur (1 test, 0 échecs) | ✅ |
 | CA-EPIC01-03 | `make lint` exécute ruff + mypy sans erreur | ✅ |
-| CA-EPIC01-04 | Le workflow CI GitHub Actions passe au vert | ⏳ À valider après push (workflow créé) |
+| CA-EPIC01-04 | Le workflow CI GitHub Actions passe au vert | ✅ |
 
 ## Livrables
 

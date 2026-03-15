@@ -13,5 +13,6 @@ Ne pas suggérer la commande pour des consultations ou modifications ponctuelles
 ## Conventions QA
 
 - Plans de test : `qa/plan-test-<nom-epic>.md`
-- Rapports de revue : `qa/reviews/<nom-epic>-review.md`
+- Revues de code : `qa/code-review/<nom-epic>-review.md`
+- Rapports finaux QA : `qa/qa-results/rapport-<nom-epic>.md`
 - La QA ne s'exécute que sur un EPIC complet, testé unitairement et avec des AC à 100%

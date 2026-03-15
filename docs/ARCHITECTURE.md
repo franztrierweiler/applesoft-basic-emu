@@ -313,8 +313,10 @@ applesoft-basic-emu/
 │   └── *.bas
 ├── plan/                        # Fichiers de planification EPIC (phase suivante)
 ├── qa/                          # Fichiers de recette QA par EPIC
+│   ├── plan-test-*.md           # Plans de test
+│   ├── code-review/             # Revues de code
+│   └── qa-results/              # Rapports finaux QA
 ├── Makefile                     # Interface standard : make help, make test, make run, etc.
-├── Dockerfile                   # Environnement de dev reproductible
 ├── pyproject.toml               # Configuration projet (pytest, ruff, mypy)
 ├── CLAUDE.md                    # Instructions Claude Code / SDD
 └── README.md                    # Guide de démarrage rapide

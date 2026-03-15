@@ -85,8 +85,8 @@ Le processus QA est piloté par la commande `/sdd-qa-workflow <epic>`. Les conve
 
 
 #### Commandes
-1- Utiliser toujours les commandes Makefile pour les instructions à l'utilisateur (`make docker-build`, `make dev`, etc.) plutôt que les commandes brutes (`docker`, `npm`, `python`)
-2- Le fichier Makefile est la référence pour builder, monter une image docker, exécuter, tester, etc
+1- Utiliser toujours les commandes Makefile pour les instructions à l'utilisateur (`make test`, `make lint`, `make run`, etc.) plutôt que les commandes brutes (`python`, `pytest`, `ruff`)
+2- Le fichier Makefile est la référence pour installer, tester, linter, exécuter, etc
 3- Au démarrage, afficher qu'un Makefile existe avec la commande permettant d'afficher l'aide
 
 ### Workflow de développement

@@ -42,17 +42,40 @@ Après validation du plan par le pilote :
 
 1. Effectuer une revue de code de l'EPIC
 2. Vérifier : lisibilité, sécurité, performance, conformité aux conventions
-3. Produire le rapport de revue dans `qa/reviews/$ARGUMENTS-review.md`
+3. Produire le rapport de revue dans `qa/code-review/$ARGUMENTS-review.md`
 
 ### 5. Rapport final
 
-```
-### Résultat QA — $ARGUMENTS
+Produire le rapport final dans `qa/qa-results/rapport-$ARGUMENTS.md` avec le contenu suivant :
+
+```markdown
+# Rapport QA — EPIC [numéro] [nom]
+
+**Date :** [YYYY-MM-DD]
+**EPIC :** $ARGUMENTS
+**Verdict :** ✅ VALIDÉ / ❌ À CORRIGER
+
+## Résultats
+
 - Tests unitaires : X/Y passés
-- Tests d'intégration : X/Y passés
+- Tests d'intégration : X/Y passés (ou N/A)
 - Scénarios QA : X/Y passés
 - Revue de code : OK / points à corriger
-### Verdict : VALIDÉ / À CORRIGER
+
+## Détail des scénarios
+
+| # | Scénario | Résultat |
+|---|----------|----------|
+| ... | ... | ✅ / ❌ |
+
+## Points d'attention
+
+[Points mineurs ou avertissements]
+
+## Références
+
+- Plan de test : `qa/plan-test-$ARGUMENTS.md`
+- Revue de code : `qa/code-review/$ARGUMENTS-review.md`
 ```
 
 ### 6. Clôture
