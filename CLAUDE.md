@@ -36,7 +36,7 @@ SPEC.md + fichiers annexes
 
 Émulateur Applesoft BASIC pour Apple II — projet de démonstration Spec Driven Development (SDD). Toute la documentation est en **français**. Les messages de commit et les commentaires dans le code doivent suivre cette convention.
 
-**Statut :** Phase de conception technique terminée ; planification et implémentation non encore commencées.
+**Statut :** Phase de planification terminée ; implémentation non encore commencée (12 EPICs planifiés).
 
 ## Structure de la documentation
 
