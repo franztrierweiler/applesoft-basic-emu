@@ -36,12 +36,15 @@ SPEC.md + fichiers annexes
 
 Émulateur Applesoft BASIC pour Apple II — projet de démonstration Spec Driven Development (SDD). Toute la documentation est en **français**. Les messages de commit et les commentaires dans le code doivent suivre cette convention.
 
-**Statut :** Phase de spécification terminée ; implémentation non encore commencée.
+**Statut :** Phase de conception technique terminée ; planification et implémentation non encore commencées.
 
 ## Structure de la documentation
 
 - `docs/SPEC.md` — Spécification SDD complète (63+ exigences sous forme EXG-XXX avec critères d'acceptation CA-XXX-XX et cas limites CL-XXX-XX)
 - `docs/GRAMMAR.md` — Grammaire EBNF complète d'Applesoft BASIC (règles de tokenisation, précédence des opérateurs, toutes les productions)
+- `docs/ARCHITECTURE.md` — Architecture technique : composants, stack, flux, modèle de données, structure répertoire
+- `docs/DEPLOYMENT.md` — Procédures de build, test, distribution CLI et web, pipeline CI/CD
+- `docs/SECURITY.md` — Exigences de sécurité (sandboxing émulateur, supply chain, XSS Phase 2)
 
 Toujours consulter ces documents avant d'implémenter ou de modifier une fonctionnalité. Les exigences ont des niveaux de priorité (Critique, Important) qui guident l'ordre d'implémentation.
 
