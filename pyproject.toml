@@ -1,0 +1,37 @@
+[project]
+name = "applesoft-basic-emu"
+version = "0.1.0"
+description = "Émulateur Applesoft BASIC pour Apple II"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+png = ["Pillow"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+src = ["src", "tests"]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "S",    # bandit (sécurité)
+    "B",    # bugbear
+    "UP",   # pyupgrade
+]
+ignore = [
+    "S101",  # assert autorisé dans les tests
+    "S311",  # RND() utilise intentionnellement le PRNG standard
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]

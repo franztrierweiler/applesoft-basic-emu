@@ -3,7 +3,7 @@
 Version : 2.0
 Date : 2026-04-06
 Auteur : Franz (Olaqin) / Claude (Anthropic)
-Statut : Brouillon
+Statut : Validé
 
 ## Changelog
 

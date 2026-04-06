@@ -38,14 +38,15 @@ docs/SPEC.md + fichiers annexes
 
 Émulateur Applesoft BASIC pour Apple II — projet de démonstration Spec Driven Development (SDD). Toute la documentation est en **français**. Les messages de commit et les commentaires dans le code doivent suivre cette convention.
 
-**Statut :** Spécification v2.0 restructurée par cas d'utilisation (UC). Conception technique à produire.
+**Statut :** Spécification v2.0 validée. Conception technique v1.0 validée (ARCHITECTURE, DEPLOYMENT, SECURITY). Prêt pour la planification.
 
 ## Structure de la documentation
 
-- `docs/SPEC.md` — Spécification SDD structurée par cas d'utilisation (28 UC, 15 RG, 5 ENF, critères d'acceptation CA-UC-XXX-YY)
+- `docs/SPEC.md` — Spécification SDD structurée par cas d'utilisation (28 UC, 15 RG, 5 ENF, critères d'acceptation CA-UC-XXX-YY) — v2.0 validée
 - `docs/GRAMMAR.md` — Grammaire EBNF complète d'Applesoft BASIC (règles de tokenisation, précédence des opérateurs, toutes les productions)
-
-Les documents de conception technique (`docs/ARCHITECTURE.md`, `docs/DEPLOYMENT.md`, `docs/SECURITY.md`) seront produits par le skill `sdd-uc-system-design` à partir du SPEC.md.
+- `docs/ARCHITECTURE.md` — Architecture détaillée : 14 composants, pipeline Lexer→Parser→Interpreter, architecture en oignon, 6 ADR — v1.0 validée
+- `docs/DEPLOYMENT.md` — Déploiement : CLI (script Python) + web (fichier HTML local), releases via tags git — v1.0 validée
+- `docs/SECURITY.md` — Sécurité : modèle de menaces, protection contre injection/path traversal/XSS, Brython embarqué — v1.0 validée
 
 Toujours consulter ces documents avant d'implémenter ou de modifier une fonctionnalité. Les cas d'utilisation et exigences ont des niveaux de priorité (Critique, Important, Souhaité) qui guident l'ordre d'implémentation.
 
