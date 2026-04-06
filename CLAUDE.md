@@ -8,53 +8,54 @@ Ce fichier fournit des instructions à Claude Code (claude.ai/code) pour travail
 docs/SPEC.md + fichiers annexes
        |
        v
-[1. Spécification]──correction──> sdd-uc_spec-write
+[1. Spécification]──correction──> 🖊️ sdd-uc-spec-write
        |
        v
-[2. Conception technique]───────> sdd-system-design
+[2. Conception technique]───────> 📐 sdd-uc-system-design
        |                            ├─> docs/ARCHITECTURE.md
        |                            ├─> docs/DEPLOYMENT.md
        |                            ├─> docs/SECURITY.md
        |                            └─> docs/COMPLIANCE_MATRIX.md (si réglementaire)
        |
        v
-[3. Planification]────────────> plan/<epic>.md
+[3. Planification]────────────> 🗺️ /sdd-plan
+       |                            └─> plan/<lot>.md
        |
        v
-[4. Développement par EPIC]───> /sdd-dev-workflow <epic>
+[4. Développement par lot]────> 🏗️ /sdd-dev-workflow <lot>
        |                          (boucle implémentation / AC / tests)
        |
        v
-[5. QA par EPIC]─────────────> /sdd-qa-workflow <epic>
+[5. QA par lot]───────────────> 🧪 /sdd-qa-workflow <lot>
        |                          (plan de test, exécution, revue de code)
        |
        v
 [6. Livraison]
+
 ```
 
 ## Vue d'ensemble du projet
 
 Émulateur Applesoft BASIC pour Apple II — projet de démonstration Spec Driven Development (SDD). Toute la documentation est en **français**. Les messages de commit et les commentaires dans le code doivent suivre cette convention.
 
-**Statut :** Phase de planification terminée ; implémentation non encore commencée (12 EPICs planifiés).
+**Statut :** Spécification v2.0 restructurée par cas d'utilisation (UC). Conception technique à produire.
 
 ## Structure de la documentation
 
-- `docs/SPEC.md` — Spécification SDD complète (63+ exigences sous forme EXG-XXX avec critères d'acceptation CA-XXX-XX et cas limites CL-XXX-XX)
+- `docs/SPEC.md` — Spécification SDD structurée par cas d'utilisation (28 UC, 15 RG, 5 ENF, critères d'acceptation CA-UC-XXX-YY)
 - `docs/GRAMMAR.md` — Grammaire EBNF complète d'Applesoft BASIC (règles de tokenisation, précédence des opérateurs, toutes les productions)
-- `docs/ARCHITECTURE.md` — Architecture technique : composants, stack, flux, modèle de données, structure répertoire
-- `docs/DEPLOYMENT.md` — Procédures de build, test, distribution CLI et web, pipeline CI/CD
-- `docs/SECURITY.md` — Exigences de sécurité (sandboxing émulateur, supply chain, XSS Phase 2)
 
-Toujours consulter ces documents avant d'implémenter ou de modifier une fonctionnalité. Les exigences ont des niveaux de priorité (Critique, Important) qui guident l'ordre d'implémentation.
+Les documents de conception technique (`docs/ARCHITECTURE.md`, `docs/DEPLOYMENT.md`, `docs/SECURITY.md`) seront produits par le skill `sdd-uc-system-design` à partir du SPEC.md.
+
+Toujours consulter ces documents avant d'implémenter ou de modifier une fonctionnalité. Les cas d'utilisation et exigences ont des niveaux de priorité (Critique, Important, Souhaité) qui guident l'ordre d'implémentation.
 
 La documentation évolue au fur et à mesure des phases d'exécution du projet.
 
 ## Méthode de travail pour ce projet
 
 ### Travail au sein de l'équipe
-1- Le fichier SPEC.md et les premiers fichiers référencés par le fichier SPEC.md constituent les documents de référence. Ils sont utilisés en entrée du skill sdd-system-design lors de la phase de mise au point. Si besoin, le skill sdd-spec-write permet de corriger la spécification et les fichiers qu'elle référence.
-2- Le skill sdd-system-design est utilisé pour produire les fichiers de conception technique.
+1- Le fichier SPEC.md et les fichiers référencés par le fichier SPEC.md constituent les documents de référence. Ils sont utilisés en entrée du skill sdd-uc-system-design lors de la phase de mise au point. Si besoin, le skill sdd-uc-spec-write permet de corriger la spécification et les fichiers qu'elle référence.
+2- Le skill sdd-uc-system-design est utilisé pour produire les fichiers de conception technique.
 3- La planification est utilisée si et seulement si les fichiers de conception technique sont disponibles.
 
 ### Rôle de Claude Code
@@ -76,22 +77,20 @@ La documentation évolue au fur et à mesure des phases d'exécution du projet.
 ### En interaction avec le pilote de projet lors de la phase de conception, de planification, de tests locaux et de déploiement
 
 #### Planification
-1- Lors d'une demande de planification, documenter chaque EPIC dans un fichier spécifique : `plan/<nom-epic>.md` (incluant le numéro de l'EPIC)
+1- Lors d'une demande de planification, documenter chaque lot dans un fichier spécifique : `plan/<nom-lot>.md` (incluant le numéro du lot)
 2- Mettre à jour la progression des tâches dans les fichiers `plan/` correspondants après chaque implémentation
 3- Mettre à jour les tableaux d'AC dans les fichiers `plan/` correspondants après chaque implémentation et test unitaire
 
 #### Recettes de test (QA)
-Le processus QA est piloté par la commande `/sdd-qa-workflow <epic>`. Les conventions sont rappelées par la rule `.claude/rules/sdd-qa.md` lors du travail sur `qa/**`.
-
-
+Le processus QA est piloté par `/sdd-qa-workflow <lot>`.
 
 #### Commandes
 1- Utiliser toujours les commandes Makefile pour les instructions à l'utilisateur (`make test`, `make lint`, `make run`, etc.) plutôt que les commandes brutes (`python`, `pytest`, `ruff`)
 2- Le fichier Makefile est la référence pour installer, tester, linter, exécuter, etc
-3- Au démarrage, afficher qu'un Makefile existe avec la commande permettant d'afficher l'aide
+3- Au démarrage, si un Makefile existe, afficher qu'il est disponible avec la commande permettant d'afficher l'aide
 
 ### Workflow de développement
-Le workflow de développement est piloté par la commande `/sdd-dev-workflow <epic>`. La rule `.claude/rules/sdd-dev-workflow.md` se charge automatiquement lors du travail sur `src/` et `tests/` pour rappeler le format attendu et suggérer de lancer la commande si nécessaire.
+Le workflow de développement est piloté par `/sdd-dev-workflow <lot>`.
 
 ### Nommage des branches git
 1- Développement sur la branche `main` avec Claude Code
