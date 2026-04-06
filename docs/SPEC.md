@@ -452,13 +452,13 @@ graph LR
 **Critères d'acceptation :**
 
 - **CA-023-01 :** Soit la ligne `10 FORI=1TO10`, Quand le lexer la tokenize, Alors la séquence produite est : `[LINENUM:10, KEYWORD:FOR, IDENT:I, OP:=, NUMBER:1, KEYWORD:TO, NUMBER:10]`.
-- **CA-023-02 :** Soit la ligne `10 IFATHENPRINT"OK"`, Quand le lexer la tokenize, Alors la séquence est : `[LINENUM:10, KEYWORD:IF, IDENT:A, KEYWORD:THEN, KEYWORD:PRINT, STRING:"OK"]`.
+- **CA-023-02 :** Soit la ligne `10 IFATHENPRINT"OK"`, Quand le lexer la tokenize, Alors la séquence est : `[LINENUM:10, KEYWORD:IF, KEYWORD:AT, IDENT:HE, KEYWORD:PRINT, STRING:"OK"]` (le tokenizer Apple II applique la correspondance gloutonne à chaque position : après `IF`, le mot réservé `AT` matche avant que `THEN` ne puisse être reconnu).
 - **CA-023-03 :** Soit la ligne `10 GOTO100`, Quand le lexer la tokenize, Alors la séquence est : `[LINENUM:10, KEYWORD:GOTO, NUMBER:100]`.
 
 **Cas limites :**
 
 - **CL-023-01 :** `SCORE` contient le mot réservé `OR` → Le lexer produit `[IDENT:SC, KEYWORD:OR, IDENT:E]` (le mot réservé OR est détecté dans le flux, conformément au comportement Applesoft).
-- **CL-023-02 :** `NOTATION` contient `NOT`, `AT` et `TO` → Le lexer applique la correspondance gloutonne : `NOT` est reconnu en premier, puis `AT` est reconnu, puis `ION` produit un identifiant. Le résultat exact doit être conforme au comportement de l'interpréteur Applesoft original.
+- **CL-023-02 :** `NOTATION` contient `NOT`, `AT` et `ON` → Le lexer applique la correspondance gloutonne caractère par caractère (fidèle au tokenizer ROM Apple II $D56C) : `NOT` est reconnu en premier, puis `AT`, puis dans le reste `ION`, `I` ne matche aucun mot réservé (identifiant), et `ON` est reconnu comme mot réservé. Résultat : `[KEYWORD:NOT, KEYWORD:AT, IDENT:I, KEYWORD:ON]`.
 
 #### EXG-024 : Identifiants de variables — règle des deux caractères
 

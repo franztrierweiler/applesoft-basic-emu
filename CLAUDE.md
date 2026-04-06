@@ -5,10 +5,10 @@ Ce fichier fournit des instructions à Claude Code (claude.ai/code) pour travail
 ## Processus global
 
 ```
-SPEC.md + fichiers annexes
+docs/SPEC.md + fichiers annexes
        |
        v
-[1. Spécification]──correction──> sdd-spec-write
+[1. Spécification]──correction──> sdd-uc_spec-write
        |
        v
 [2. Conception technique]───────> sdd-system-design
@@ -82,6 +82,7 @@ La documentation évolue au fur et à mesure des phases d'exécution du projet.
 
 #### Recettes de test (QA)
 Le processus QA est piloté par la commande `/sdd-qa-workflow <epic>`. Les conventions sont rappelées par la rule `.claude/rules/sdd-qa.md` lors du travail sur `qa/**`.
+
 
 
 #### Commandes
