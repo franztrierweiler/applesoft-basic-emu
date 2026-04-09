@@ -22,6 +22,10 @@ ERROR_MESSAGES: dict[int, str] = {
     224: "UNDEF'D FUNCTION",
     254: "CAN'T CONTINUE",
     255: "FORMULA TOO COMPLEX",
+    # Codes étendus pour fichiers (UC-004, UC-005)
+    256: "FILE NOT FOUND",
+    257: "PATH NOT ALLOWED",
+    258: "FILE TOO LARGE",
 }
 
 

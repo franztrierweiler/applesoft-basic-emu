@@ -552,21 +552,21 @@ Liste complète des mots réservés Applesoft BASIC supportés par l'émulateur.
 ABS       AND       ASC       AT        ATN
 CALL      CHR$      CLEAR     COLOR=    CONT
 COS       DATA      DEF       DEL       DIM
-DRAW      END       EXP       FLASH     FN
-FOR       GET       GOSUB     GOTO      GR
-HCOLOR=   HGR       HGR2      HIMEM:    HOME
-HPLOT     HTAB      IF        IN        INPUT
-INT       INVERSE   LEFT$     LEN       LET
-LIST      LOAD      LOG       LOMEM:    MID$
-NEW       NEXT      NORMAL    NOT       ON
-ONERR     OR        PEEK      PLOT      POKE
-POP       POS       PRINT     READ      REM
-RESTORE   RESUME    RETURN    RIGHT$    RND
-ROT=      RUN       SAVE      SCALE=    SCRN(
-SGN       SIN       SPC(      SPEED=    SQR
-STEP      STOP      STR$      TAB(      TAN
-TEXT      THEN      TO        VAL       VLIN
-VTAB      XDRAW
+DRAW      ELSE      END       EXP       FLASH
+FN        FOR       GET       GOSUB     GOTO
+GR        HCOLOR=   HGR       HGR2      HIMEM:
+HOME      HPLOT     HTAB      IF        IN
+INPUT     INT       INVERSE   LEFT$     LEN
+LET       LIST      LOAD      LOG       LOMEM:
+MID$      NEW       NEXT      NORMAL    NOT
+ON        ONERR     OR        PEEK      PLOT
+POKE      POP       POS       PRINT     READ
+REM       RESTORE   RESUME    RETURN    RIGHT$
+RND       ROT=      RUN       SAVE      SCALE=
+SCRN(     SGN       SIN       SPC(      SPEED=
+SQR       STEP      STOP      STR$      TAB(
+TAN       TEXT      THEN      TO        VAL
+VLIN      VTAB      XDRAW
 ```
 
 **Notes :**

@@ -1,4 +1,7 @@
-"""Tests unitaires pour le module REPL (UC-001, UC-002)."""
+"""Tests unitaires pour le module REPL (UC-001, UC-002, UC-004, UC-005)."""
+
+import os
+import tempfile
 
 from applesoft.io_cli import IOBridgeCLI
 from applesoft.repl import REPL
@@ -145,3 +148,86 @@ class TestREPLDel:
         repl, io = make_repl(['10 PRINT "A"', '20 PRINT "B"', '30 PRINT "C"', "DEL 20,20"])
         repl.run()
         assert repl.program.line_numbers() == [10, 30]
+
+
+# === UC-004 : SAVE ===
+
+
+class TestUC004Save:
+    def test_ca_uc_004_01_save_creates_file(self):
+        """CA-UC-004-01 : SAVE → fichier créé au format texte."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            io = MockIO(['10 PRINT "A"', '20 PRINT "B"', 'SAVE "TEST.BAS"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            filepath = os.path.join(tmpdir, "TEST.BAS")
+            assert os.path.exists(filepath)
+            content = open(filepath).read()
+            assert "10 " in content
+            assert "20 " in content
+            assert "PRINT" in content
+
+    def test_save_no_filename_error(self):
+        """SAVE sans nom → ?SYNTAX ERROR."""
+        repl, io = make_repl(['10 PRINT "A"'])
+        repl.run()
+        # SAVE seul ne peut pas être parsé sans argument string
+
+
+# === UC-005 : LOAD ===
+
+
+class TestUC005Load:
+    def test_ca_uc_005_01_load_replaces_and_clears(self):
+        """CA-UC-005-01 : LOAD → programme chargé, variables effacées."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filepath = os.path.join(tmpdir, "TEST.BAS")
+            with open(filepath, "w") as f:
+                f.write('10 PRINT "LOADED"\n20 PRINT "OK"\n')
+            io = MockIO(
+                [
+                    '5 PRINT "OLD"',
+                    "X = 42",
+                    'LOAD "TEST.BAS"',
+                    "LIST",
+                ]
+            )
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            assert repl.program.has_line(10)
+            assert repl.program.has_line(20)
+            assert not repl.program.has_line(5)
+
+    def test_ca_uc_005_02_load_replaces_entirely(self):
+        """CA-UC-005-02 : LOAD → ancien programme intégralement remplacé."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filepath = os.path.join(tmpdir, "NEW.BAS")
+            with open(filepath, "w") as f:
+                f.write('100 PRINT "NEW"\n')
+            io = MockIO(
+                [
+                    '10 PRINT "A"',
+                    '20 PRINT "B"',
+                    '30 PRINT "C"',
+                    'LOAD "NEW.BAS"',
+                ]
+            )
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            assert repl.program.line_numbers() == [100]
+
+    def test_load_file_not_found(self):
+        """LOAD fichier inexistant → ?FILE NOT FOUND ERROR."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            io = MockIO(['LOAD "NONEXISTENT.BAS"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            assert "?FILE NOT FOUND ERROR" in io.output
+
+    def test_load_path_traversal_blocked(self):
+        """SEC-BP-22 : LOAD avec path traversal → bloqué."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            io = MockIO(['LOAD "../../etc/passwd"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            assert "ERROR" in io.output

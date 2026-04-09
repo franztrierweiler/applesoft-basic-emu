@@ -27,6 +27,15 @@ class Environment:
         self._cont_point: tuple[int, int] | None = None
         self._program_modified: bool = False
         self._stopped: bool = False
+        # État d'affichage (UC-009)
+        self._video_mode: str = "normal"  # "normal", "inverse", "flash"
+        self._speed: int = 0  # 0-255, 0 = max speed
+        # État d'erreur (UC-023, RG-0011)
+        self._error_code: int = 0
+        self._error_line: int = 0
+        self._onerr_target: int | None = None
+        self._onerr_active: bool = False  # True si on est dans le handler ONERR
+        self._resume_point: tuple[int, int] | None = None  # (line_num, stmt_idx)
 
     # --- Variables ---
 
@@ -188,6 +197,64 @@ class Environment:
     @property
     def stopped(self) -> bool:
         return self._stopped
+
+    # --- Affichage (UC-009) ---
+
+    @property
+    def video_mode(self) -> str:
+        return self._video_mode
+
+    @video_mode.setter
+    def video_mode(self, mode: str) -> None:
+        self._video_mode = mode
+
+    @property
+    def speed(self) -> int:
+        return self._speed
+
+    @speed.setter
+    def speed(self, value: int) -> None:
+        self._speed = value
+
+    # --- État d'erreur (UC-023, RG-0011) ---
+
+    def get_error_code(self) -> int:
+        return self._error_code
+
+    def set_error_code(self, code: int) -> None:
+        self._error_code = code
+
+    def get_error_line(self) -> int:
+        return self._error_line
+
+    def set_error_line(self, line: int) -> None:
+        self._error_line = line
+
+    def set_onerr_target(self, target: int | None) -> None:
+        """Installe ou désactive le handler ONERR GOTO."""
+        self._onerr_target = target
+        if target is None or target == 0:
+            self._onerr_target = None
+
+    def get_onerr_target(self) -> int | None:
+        return self._onerr_target
+
+    def set_onerr_active(self, active: bool) -> None:
+        """Indique si on est dans le handler ONERR (protection anti-boucle)."""
+        self._onerr_active = active
+
+    def is_onerr_active(self) -> bool:
+        return self._onerr_active
+
+    def set_resume_point(self, line_num: int, stmt_idx: int) -> None:
+        """Sauvegarde le point de reprise pour RESUME."""
+        self._resume_point = (line_num, stmt_idx)
+
+    def get_resume_point(self) -> tuple[int, int] | None:
+        return self._resume_point
+
+    def clear_resume_point(self) -> None:
+        self._resume_point = None
 
 
 def _check_type_assignment(name: str, value: object) -> None:

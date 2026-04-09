@@ -85,29 +85,29 @@ Implémenter toutes les structures de contrôle (GOTO, IF/THEN/ELSE, ON...GOTO/G
 
 | AC | Description | Statut | Justification | Date |
 |---|---|---|---|---|
-| CA-UC-007-01 | `INPUT A$ : PRINT A$` → saisie reflétée | ⏳ | | |
-| CA-UC-007-02 | `INPUT "NAME";N$` → invite `NAME?` | ⏳ | | |
-| CA-UC-007-03 | `INPUT A,B : PRINT A+B` → somme des deux valeurs | ⏳ | | |
-| CA-UC-007-04 | `GET A$ : PRINT A$` → caractère sans écho | ⏳ | | |
-| CA-UC-008-01 | `DATA 1,2,3` / `READ A,B,C` / `PRINT A+B+C` → `6` | ⏳ | | |
-| CA-UC-008-02 | DATA après READ → position sans importance | ⏳ | | |
-| CA-UC-008-03 | RESTORE → relecture depuis le début | ⏳ | | |
-| CA-UC-012-01 | `GOTO 30` saute la ligne 20 | ⏳ | | |
-| CA-UC-012-02 | `IF X>3 THEN PRINT "YES"` → conditionnel | ⏳ | | |
-| CA-UC-012-03 | IF faux avec multi-commandes THEN → bloc entier sauté | ⏳ | | |
-| CA-UC-012-04 | `IF X>3 THEN ... ELSE ...` → branche ELSE | ⏳ | | |
-| CA-UC-012-05 | `IF X>3 THEN 100` → GOTO implicite | ⏳ | | |
-| CA-UC-012-06 | `ON X GOTO 100,200,300` → branchement indexé | ⏳ | | |
-| CA-UC-012-07 | IF imbriqués sur une même ligne | ⏳ | | |
-| CA-UC-013-01 | `FOR I=1 TO 3 : PRINT I : NEXT` → 1, 2, 3 | ⏳ | | |
-| CA-UC-013-02 | `FOR I=1 TO 10 STEP 3` → 1, 4, 7, 10 | ⏳ | | |
-| CA-UC-013-03 | `FOR I=5 TO 1 STEP -1` → 5, 4, 3, 2, 1 | ⏳ | | |
-| CA-UC-013-04 | Boucles imbriquées avec `NEXT J,I` | ⏳ | | |
-| CA-UC-014-01 | GOSUB + RETURN → retour après GOSUB | ⏳ | | |
-| CA-UC-014-02 | GOSUB imbriqués | ⏳ | | |
-| CA-UC-014-03 | POP + GOTO au lieu de RETURN | ⏳ | | |
-| CA-UC-014-04 | ON X GOSUB → appel indexé avec RETURN | ⏳ | | |
+| CA-UC-007-01 | `INPUT A$ : PRINT A$` → saisie reflétée | ✅ | test_ca_uc_007_01_input_string | 2026-04-06 |
+| CA-UC-007-02 | `INPUT "NAME";N$` → invite `NAME?` | ✅ | test_ca_uc_007_02_input_prompt | 2026-04-06 |
+| CA-UC-007-03 | `INPUT A,B : PRINT A+B` → somme des deux valeurs | ✅ | test_ca_uc_007_03_input_multi | 2026-04-06 |
+| CA-UC-007-04 | `GET A$ : PRINT A$` → caractère sans écho | ✅ | test_ca_uc_007_04_get_char | 2026-04-06 |
+| CA-UC-008-01 | `DATA 1,2,3` / `READ A,B,C` / `PRINT A+B+C` → `6` | ✅ | test_ca_uc_008_01_data_read | 2026-04-06 |
+| CA-UC-008-02 | DATA après READ → position sans importance | ✅ | test_ca_uc_008_02_data_position | 2026-04-06 |
+| CA-UC-008-03 | RESTORE → relecture depuis le début | ✅ | test_ca_uc_008_03_restore | 2026-04-06 |
+| CA-UC-012-01 | `GOTO 30` saute la ligne 20 | ✅ | test_ca_uc_012_01_goto_skips | 2026-04-06 |
+| CA-UC-012-02 | `IF X>3 THEN PRINT "YES"` → conditionnel | ✅ | test_ca_uc_012_02_if_then_true | 2026-04-06 |
+| CA-UC-012-03 | IF faux avec multi-commandes THEN → bloc entier sauté | ✅ | test_ca_uc_012_03_if_false_skips_block | 2026-04-06 |
+| CA-UC-012-04 | `IF X>3 THEN ... ELSE ...` → branche ELSE | ✅ | test_ca_uc_012_04_if_else | 2026-04-06 |
+| CA-UC-012-05 | `IF X>3 THEN 100` → GOTO implicite | ✅ | test_ca_uc_012_05_if_then_linenum | 2026-04-06 |
+| CA-UC-012-06 | `ON X GOTO 100,200,300` → branchement indexé | ✅ | test_ca_uc_012_06_on_goto | 2026-04-06 |
+| CA-UC-012-07 | IF imbriqués sur une même ligne | ✅ | test_ca_uc_012_07_if_nested | 2026-04-06 |
+| CA-UC-013-01 | `FOR I=1 TO 3 : PRINT I : NEXT` → 1, 2, 3 | ✅ | test_ca_uc_013_01_for_next_basic | 2026-04-06 |
+| CA-UC-013-02 | `FOR I=1 TO 10 STEP 3` → 1, 4, 7, 10 | ✅ | test_ca_uc_013_02_for_step | 2026-04-06 |
+| CA-UC-013-03 | `FOR I=5 TO 1 STEP -1` → 5, 4, 3, 2, 1 | ✅ | test_ca_uc_013_03_for_step_negative | 2026-04-06 |
+| CA-UC-013-04 | Boucles imbriquées avec `NEXT J,I` | ✅ | test_ca_uc_013_04_nested_next_ji | 2026-04-06 |
+| CA-UC-014-01 | GOSUB + RETURN → retour après GOSUB | ✅ | test_ca_uc_014_01_gosub_return | 2026-04-06 |
+| CA-UC-014-02 | GOSUB imbriqués | ✅ | test_ca_uc_014_02_gosub_nested | 2026-04-06 |
+| CA-UC-014-03 | POP + GOTO au lieu de RETURN | ✅ | test_ca_uc_014_03_pop_goto | 2026-04-06 |
+| CA-UC-014-04 | ON X GOSUB → appel indexé avec RETURN | ✅ | test_ca_uc_014_04_on_gosub | 2026-04-06 |
 
 ## Prochaines actions
 
-A implémenter via /sdd-dev-workflow lot-03-controle-flux-entrees
+Lot terminé — prêt pour QA

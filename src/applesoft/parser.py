@@ -228,7 +228,11 @@ class Parser:
         self._advance()  # Consommer PRINT
         items = []  # list[tuple[expr, sep]]
 
-        while not self._at_end() and not self._check(TokenType.COLON):
+        while (
+            not self._at_end()
+            and not self._check(TokenType.COLON)
+            and not self._check_keyword("ELSE")
+        ):
             # SPC( et TAB(
             if self._check_keyword("SPC("):
                 self._advance()

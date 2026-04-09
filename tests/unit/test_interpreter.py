@@ -1,4 +1,7 @@
-"""Tests unitaires pour l'interpréteur (UC-003, UC-006, UC-010, UC-011, RG-0006 à RG-0010)."""
+"""Tests unitaires pour l'interpréteur.
+
+UC-003, UC-006, UC-009, UC-010, UC-011, UC-015, UC-016, UC-017, RG-0006 à RG-0010.
+"""
 
 import pytest
 
@@ -17,6 +20,9 @@ class MockIO(IOBridgeCLI):
     def __init__(self):
         super().__init__()
         self._output: list[str] = []
+        self._cleared: bool = False
+        self._cursor_row: int = 1
+        self._video_mode_log: list[str] = []
 
     def print_str(self, text: str) -> None:
         self._output.append(text)
@@ -31,6 +37,19 @@ class MockIO(IOBridgeCLI):
         if prompt:
             self.print_str(prompt)
         raise EOFError
+
+    def clear_screen(self) -> None:
+        self._cleared = True
+        self._cursor_column = 1
+        self._cursor_row = 1
+
+    def move_cursor_to_row(self, row: int) -> None:
+        self._cursor_row = row
+        self._cursor_column = 1
+
+    def set_video_mode(self, mode: str) -> None:
+        super().set_video_mode(mode)
+        self._video_mode_log.append(mode)
 
     @property
     def output(self) -> str:
@@ -427,3 +446,239 @@ class TestRG0009Rem:
         out = run_program(['10 REM TEXTE : PRINT "CACHÉ"'])
         assert "CACHÉ" not in out
         assert out == ""
+
+
+def run_program_io(lines: list[str]) -> MockIO:
+    """Helper : crée un programme, l'exécute et retourne l'objet IO."""
+    io = MockIO()
+    prog = Program()
+    env = Environment()
+
+    for line in lines:
+        tokens = tokenize(line)
+        if tokens and tokens[0].type == TokenType.LINENUM:
+            prog.add_line(tokens[0].value, tokens[1:])
+
+    interp = Interpreter(prog, env, io)
+    interp.run()
+    return io
+
+
+# === UC-009 : Contrôle de l'affichage ===
+
+
+class TestUC009DisplayControl:
+    def test_ca_uc_009_01_htab(self):
+        """CA-UC-009-01 : HTAB 10 : PRINT "X" → X en colonne 10."""
+        io = run_program_io(['10 HTAB 10 : PRINT "X"'])
+        # HTAB insère des espaces, puis X
+        assert "X" in io.output
+        # Vérifier que HTAB produit 9 espaces (col 1→10)
+        assert "         X" in io.output
+
+    def test_ca_uc_009_02_vtab_htab(self):
+        """CA-UC-009-02 : VTAB 12 : HTAB 20 : PRINT "X" → position (12,20)."""
+        io = run_program_io(['10 VTAB 12 : HTAB 20 : PRINT "X"'])
+        assert io._cursor_row == 12
+        assert "X" in io.output
+
+    def test_ca_uc_009_03_home(self):
+        """CA-UC-009-03 : HOME → écran vidé, curseur en (1,1)."""
+        io = run_program_io(["10 HOME"])
+        assert io._cleared is True
+        assert io._cursor_column == 1
+        assert io._cursor_row == 1
+
+    def test_ca_uc_009_04_inverse(self):
+        """CA-UC-009-04 : INVERSE + PRINT → mode inversé."""
+        io = run_program_io(['10 INVERSE : PRINT "INV" : NORMAL : PRINT "NOR"'])
+        assert "inverse" in io._video_mode_log
+        assert "normal" in io._video_mode_log
+        assert "INV" in io.output
+        assert "NOR" in io.output
+
+    def test_ca_uc_009_05_flash(self):
+        """CA-UC-009-05 : FLASH + PRINT → attribut clignotant."""
+        io = run_program_io(['10 FLASH : PRINT "BLINK"'])
+        assert "flash" in io._video_mode_log
+        assert "BLINK" in io.output
+
+    def test_ca_uc_009_06_speed(self):
+        """CA-UC-009-06 : SPEED=100 → délai configuré."""
+        io = run_program_io(['10 SPEED=100 : PRINT "SLOW"'])
+        assert io._speed == 100
+        assert "SLOW" in io.output
+
+    def test_htab_out_of_range(self):
+        """HTAB 0 ou 41 → ?ILLEGAL QUANTITY ERROR."""
+        with pytest.raises(BasicError) as exc_info:
+            run_program(["10 HTAB 0"])
+        assert exc_info.value.code == 53
+
+        with pytest.raises(BasicError) as exc_info:
+            run_program(["10 HTAB 41"])
+        assert exc_info.value.code == 53
+
+    def test_vtab_out_of_range(self):
+        """VTAB 0 ou 25 → ?ILLEGAL QUANTITY ERROR."""
+        with pytest.raises(BasicError) as exc_info:
+            run_program(["10 VTAB 0"])
+        assert exc_info.value.code == 53
+
+        with pytest.raises(BasicError) as exc_info:
+            run_program(["10 VTAB 25"])
+        assert exc_info.value.code == 53
+
+    def test_speed_out_of_range(self):
+        """SPEED= -1 ou 256 → ?ILLEGAL QUANTITY ERROR."""
+        with pytest.raises(BasicError) as exc_info:
+            run_program(["10 SPEED= -1"])
+        assert exc_info.value.code == 53
+
+        with pytest.raises(BasicError) as exc_info:
+            run_program(["10 SPEED= 256"])
+        assert exc_info.value.code == 53
+
+
+# === UC-015 : Fonctions mathématiques ===
+
+
+class TestUC015MathFunctions:
+    def test_ca_uc_015_01_abs(self):
+        """CA-UC-015-01 : PRINT ABS(-5) → 5."""
+        out = run_program(["10 PRINT ABS(-5)"])
+        assert " 5\n" in out
+
+    def test_ca_uc_015_02_int_positive(self):
+        """CA-UC-015-02 : PRINT INT(3.7) → 3."""
+        out = run_program(["10 PRINT INT(3.7)"])
+        assert " 3\n" in out
+
+    def test_ca_uc_015_03_int_negative(self):
+        """CA-UC-015-03 : PRINT INT(-3.7) → -4 (arrondi vers le bas)."""
+        out = run_program(["10 PRINT INT(-3.7)"])
+        assert "-4\n" in out
+
+    def test_ca_uc_015_04_sqr(self):
+        """CA-UC-015-04 : PRINT SQR(16) → 4."""
+        out = run_program(["10 PRINT SQR(16)"])
+        assert " 4\n" in out
+
+    def test_ca_uc_015_05_sgn(self):
+        """CA-UC-015-05 : PRINT SGN(-42) → -1."""
+        out = run_program(["10 PRINT SGN(-42)"])
+        assert "-1\n" in out
+
+    def test_ca_uc_015_06_rnd_different(self):
+        """CA-UC-015-06 : deux RND(1) → valeurs différentes dans [0,1)."""
+        out = run_program(["10 PRINT RND(1)", "20 PRINT RND(1)"])
+        lines = [x.strip() for x in out.strip().split("\n")]
+        assert len(lines) == 2
+        v1, v2 = float(lines[0]), float(lines[1])
+        assert 0 <= v1 < 1
+        assert 0 <= v2 < 1
+        # Probabilité de collision ~0
+        assert v1 != v2
+
+    def test_ca_uc_015_07_rnd_seed(self):
+        """CA-UC-015-07 : RND(-5) + RND(1) → graine déterministe."""
+        out1 = run_program(["10 X = RND(-5)", "20 PRINT RND(1)"])
+        out2 = run_program(["10 X = RND(-5)", "20 PRINT RND(1)"])
+        v1 = float(out1.strip())
+        v2 = float(out2.strip())
+        assert v1 == v2
+
+    def test_ca_uc_015_08_rnd_zero_repeats(self):
+        """CA-UC-015-08 : RND(0) → répète le dernier."""
+        out = run_program(["10 X = RND(1)", "20 PRINT X", "30 PRINT RND(0)"])
+        lines = [x.strip() for x in out.strip().split("\n")]
+        assert len(lines) == 2
+        assert lines[0] == lines[1]
+
+
+# === UC-016 : Fonctions de chaînes ===
+
+
+class TestUC016StringFunctions:
+    def test_ca_uc_016_01_len(self):
+        """CA-UC-016-01 : PRINT LEN("HELLO") → 5."""
+        out = run_program(['10 PRINT LEN("HELLO")'])
+        assert " 5\n" in out
+
+    def test_ca_uc_016_02_left(self):
+        """CA-UC-016-02 : PRINT LEFT$("HELLO",3) → HEL."""
+        out = run_program(['10 PRINT LEFT$("HELLO",3)'])
+        assert "HEL\n" in out
+
+    def test_ca_uc_016_03_right(self):
+        """CA-UC-016-03 : PRINT RIGHT$("HELLO",3) → LLO."""
+        out = run_program(['10 PRINT RIGHT$("HELLO",3)'])
+        assert "LLO\n" in out
+
+    def test_ca_uc_016_04_mid(self):
+        """CA-UC-016-04 : PRINT MID$("HELLO",2,3) → ELL."""
+        out = run_program(['10 PRINT MID$("HELLO",2,3)'])
+        assert "ELL\n" in out
+
+    def test_ca_uc_016_05_asc(self):
+        """CA-UC-016-05 : PRINT ASC("A") → 65."""
+        out = run_program(['10 PRINT ASC("A")'])
+        assert " 65\n" in out
+
+    def test_ca_uc_016_06_chr(self):
+        """CA-UC-016-06 : PRINT CHR$(65) → A."""
+        out = run_program(["10 PRINT CHR$(65)"])
+        assert "A\n" in out
+
+    def test_ca_uc_016_07_val(self):
+        """CA-UC-016-07 : PRINT VAL("3.14") → 3.14."""
+        out = run_program(['10 PRINT VAL("3.14")'])
+        assert "3.14\n" in out
+
+    def test_ca_uc_016_08_str(self):
+        """CA-UC-016-08 : PRINT STR$(42) → " 42"."""
+        out = run_program(["10 PRINT STR$(42)"])
+        # STR$ retourne " 42" (avec espace), PRINT l'affiche puis \n
+        assert " 42\n" in out
+
+    def test_ca_uc_016_09_mid_out_of_range(self):
+        """CA-UC-016-09 : MID$("AB",5,1) → chaîne vide."""
+        out = run_program(['10 PRINT MID$("AB",5,1)'])
+        assert out == "\n"
+
+    def test_ca_uc_016_10_val_non_numeric(self):
+        """CA-UC-016-10 : VAL("HELLO") → 0."""
+        out = run_program(['10 PRINT VAL("HELLO")'])
+        assert " 0\n" in out
+
+    def test_ca_uc_016_11_val_partial(self):
+        """CA-UC-016-11 : VAL("3ABC") → 3."""
+        out = run_program(['10 PRINT VAL("3ABC")'])
+        assert " 3\n" in out
+
+
+# === UC-017 : Fonctions utilisateur DEF FN ===
+
+
+class TestUC017DefFn:
+    def test_ca_uc_017_01_def_fn_double(self):
+        """CA-UC-017-01 : DEF FN DOUBLE(X)=X*2 : PRINT FN DOUBLE(5) → 10."""
+        out = run_program(["10 DEF FN DOUBLE(X) = X * 2", "20 PRINT FN DOUBLE(5)"])
+        assert " 10\n" in out
+
+    def test_ca_uc_017_02_def_fn_global_var(self):
+        """CA-UC-017-02 : DEF FN avec variable globale → correctement évaluée."""
+        out = run_program(
+            [
+                "10 Y = 10",
+                "20 DEF FN ADD(X) = X + Y",
+                "30 PRINT FN ADD(5)",
+            ]
+        )
+        assert " 15\n" in out
+
+    def test_ca_uc_017_03_undef_fn_error(self):
+        """FN sans DEF → ?UNDEF'D FUNCTION ERROR."""
+        with pytest.raises(BasicError) as exc_info:
+            run_program(["10 PRINT FN NOPE(1)"])
+        assert exc_info.value.code == 224
