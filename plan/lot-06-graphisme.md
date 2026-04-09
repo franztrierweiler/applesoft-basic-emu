@@ -75,23 +75,23 @@ Implémenter le moteur graphique complet : basse résolution (40x48, 16 couleurs
 
 | AC | Description | Statut | Justification | Date |
 |---|---|---|---|---|
-| CA-UC-018-01 | GR → mode LoRes activé, écran noir | ⏳ | | |
-| CA-UC-018-02 | `GR : COLOR=1 : PLOT 5,5` → bloc magenta en (5,5) | ⏳ | | |
-| CA-UC-018-03 | `GR : COLOR=4 : HLIN 0,39 AT 20` → ligne horizontale verte | ⏳ | | |
-| CA-UC-018-04 | `HLIN 30,10 AT 5` → inversion des bornes, ligne tracée | ⏳ | | |
-| CA-UC-018-05 | `COLOR=9 : PLOT 5,5 : PRINT SCRN(5,5)` → `9` | ⏳ | | |
-| CA-UC-018-06 | `GR : PLOT 5,5 : TEXT : PRINT "BACK"` → mode texte restauré | ⏳ | | |
-| CA-UC-019-01 | HGR → mode HiRes page 1, 4 lignes texte en bas | ⏳ | | |
-| CA-UC-019-02 | HGR2 → mode HiRes page 2, plein écran | ⏳ | | |
-| CA-UC-019-03 | `HCOLOR=1 : HPLOT 0,0 TO 279,191` → diagonale verte | ⏳ | | |
-| CA-UC-019-04 | HPLOT enchaîné TO TO TO → carré tracé | ⏳ | | |
-| CA-UC-019-05 | `HPLOT 50,50 : HPLOT TO 100,100` → point + ligne | ⏳ | | |
-| CA-UC-020-01 | Shape table chargée + DRAW → forme dessinée | ⏳ | | |
-| CA-UC-020-02 | DRAW puis XDRAW même position → forme effacée | ⏳ | | |
-| CA-UC-020-03 | ROT=16, SCALE=2, DRAW → rotation 90° et échelle 2 | ⏳ | | |
-| CA-UC-021-01 | Programme LoRes en CLI → rendu visible en terminal ou export image | ⏳ | | |
-| CA-UC-021-02 | Programme HiRes en CLI → rendu visible en terminal ou export image | ⏳ | | |
+| CA-UC-018-01 | GR → mode LoRes activé, écran noir | ✅ | test_ca_uc_018_01_gr_active_lores | 2026-04-09 |
+| CA-UC-018-02 | `GR : COLOR=1 : PLOT 5,5` → bloc magenta en (5,5) | ✅ | test_ca_uc_018_02_plot_magenta | 2026-04-09 |
+| CA-UC-018-03 | `GR : COLOR=4 : HLIN 0,39 AT 20` → ligne horizontale verte | ✅ | test_ca_uc_018_03_hlin_green | 2026-04-09 |
+| CA-UC-018-04 | `HLIN 30,10 AT 5` → inversion des bornes, ligne tracée | ✅ | test_ca_uc_018_04_hlin_inverted_bounds | 2026-04-09 |
+| CA-UC-018-05 | `COLOR=9 : PLOT 5,5 : PRINT SCRN(5,5)` → `9` | ✅ | test_ca_uc_018_05_scrn_reads_color | 2026-04-09 |
+| CA-UC-018-06 | `GR : PLOT 5,5 : TEXT : PRINT "BACK"` → mode texte restauré | ✅ | test_ca_uc_018_06_text_restores_text_mode | 2026-04-09 |
+| CA-UC-019-01 | HGR → mode HiRes page 1, 4 lignes texte en bas | ✅ | test_ca_uc_019_01_hgr_activates_page1 | 2026-04-09 |
+| CA-UC-019-02 | HGR2 → mode HiRes page 2, plein écran | ✅ | test_ca_uc_019_02_hgr2_activates_page2 | 2026-04-09 |
+| CA-UC-019-03 | `HCOLOR=1 : HPLOT 0,0 TO 279,191` → diagonale verte | ✅ | test_ca_uc_019_03_hplot_diagonal | 2026-04-09 |
+| CA-UC-019-04 | HPLOT enchaîné TO TO TO → carré tracé | ✅ | test_ca_uc_019_04_hplot_chained_square | 2026-04-09 |
+| CA-UC-019-05 | `HPLOT 50,50 : HPLOT TO 100,100` → point + ligne | ✅ | test_ca_uc_019_05_hplot_point_and_line_from_last | 2026-04-09 |
+| CA-UC-020-01 | Shape table chargée + DRAW → forme dessinée | ✅ | test_ca_uc_020_01_draw_shape | 2026-04-09 |
+| CA-UC-020-02 | DRAW puis XDRAW même position → forme effacée | ✅ | test_ca_uc_020_02_xdraw_erases | 2026-04-09 |
+| CA-UC-020-03 | ROT=16, SCALE=2, DRAW → rotation 90° et échelle 2 | ✅ | test_ca_uc_020_03_rot_and_scale | 2026-04-09 |
+| CA-UC-021-01 | Programme LoRes en CLI → rendu visible en terminal ou export image | ✅ | test_ca_uc_021_01_lores_render | 2026-04-09 |
+| CA-UC-021-02 | Programme HiRes en CLI → rendu visible en terminal ou export image | ✅ | test_ca_uc_021_02_hires_render | 2026-04-09 |
 
 ## Prochaines actions
 
-A implémenter via /sdd-dev-workflow lot-06-graphisme
+Lot terminé — prêt pour QA
