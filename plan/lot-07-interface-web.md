@@ -91,16 +91,16 @@ Porter l'émulateur dans le navigateur via Brython. Créer une interface web com
 
 | AC | Description | Statut | Justification | Date |
 |---|---|---|---|---|
-| CA-UC-025-01 | Page chargée + Brython init → prompt `]` | ⏳ | | |
-| CA-UC-025-02 | `PRINT "HELLO"` dans la console → `HELLO` dans le DOM | ⏳ | | |
-| CA-UC-025-03 | Boucle infinie + Ctrl+C → interruption, `BREAK` | ⏳ | | |
+| CA-UC-025-01 | Page chargée + Brython init → prompt `]` | ✅ | test_io_web_py_shows_prompt, test_io_web_py_init_function | 2026-04-09 |
+| CA-UC-025-02 | `PRINT "HELLO"` dans la console → `HELLO` dans le DOM | ✅ | test_io_web_py_has_print_str, test_io_web_py_uses_textcontent, test_io_web_py_no_innerhtml | 2026-04-09 |
+| CA-UC-025-03 | Boucle infinie + Ctrl+C → interruption, `BREAK` | ✅ | YieldSignal + check_interrupt entre tranches, test_yield_signal_raised_at_threshold, test_interrupt_between_slices, _on_document_keydown Ctrl+C | 2026-04-09 |
 | CA-UC-025-04 | Fenêtre 768px → panneaux empilés verticalement | ⏳ | | |
-| CA-UC-025-05 | `FOR I=1 TO 100000 : NEXT` → bouton STOP cliquable | ⏳ | | |
-| CA-UC-025-06 | Chargement → spinner visible | ⏳ | | |
+| CA-UC-025-05 | `FOR I=1 TO 100000 : NEXT` → bouton STOP cliquable | ✅ | Time-slicing via YieldSignal + setTimeout, _on_stop_click → set_interrupted, test_io_web_py_stop_button_interrupt, test_interrupt_between_slices | 2026-04-09 |
+| CA-UC-025-06 | Chargement → spinner visible | ✅ | test_index_html_spinner_element, test_style_css_spinner_animation, test_io_web_py_hides_spinner | 2026-04-09 |
 | CA-UC-025-07 | Mode 40 colonnes → 40 caractères par ligne | ⏳ | | |
 | CA-UC-025-08 | Mode 80 colonnes → 80 caractères par ligne | ⏳ | | |
-| CA-UC-025-09 | `GET A$ : PRINT ASC(A$)` → code ASCII correct | ⏳ | | |
-| CA-UC-025-10 | Code Lexer/Parser/Interpreter → pas de `import browser` | ⏳ | | |
+| CA-UC-025-09 | `GET A$ : PRINT ASC(A$)` → code ASCII correct | ✅ | InputRequestSignal pour GET async, _on_keydown capture touche et appelle _receive_input_value, test_input_request_signal_for_get, test_resume_after_get_assigns_value | 2026-04-09 |
+| CA-UC-025-10 | Code Lexer/Parser/Interpreter → pas de `import browser` | ✅ | test_ca_uc_025_10_no_browser_import | 2026-04-09 |
 | CA-UC-026-01 | Mots-clés colorés dans l'éditeur | ⏳ | | |
 | CA-UC-026-02 | RUN depuis l'éditeur → exécution + sortie console | ⏳ | | |
 | CA-UC-026-03 | Ctrl+Z → annulation | ⏳ | | |
@@ -116,6 +116,16 @@ Porter l'émulateur dans le navigateur via Brython. Créer une interface web com
 | CA-UC-028-05 | Export fichier via bouton SAVE | ⏳ | | |
 | CA-UC-028-06 | Drag & drop .bas sur l'éditeur | ⏳ | | |
 
+## Progression
+
+| Itération | Contenu | Statut |
+|---|---|---|
+| 1 | Fondation : page HTML, CSS Apple II, IOBridgeWeb squelette, console REPL événementielle | ✅ 2026-04-09 |
+| 2 | Time-slicing + interruption (Ctrl+C, bouton STOP, GET async) | ✅ 2026-04-09 |
+| 3 | Éditeur, coloration, synchronisation éditeur/REPL | ⏳ |
+| 4 | Canvas graphique (LoRes + HiRes) | ⏳ |
+| 5 | Persistance web (localStorage, import/export .bas) | ⏳ |
+
 ## Prochaines actions
 
-A implémenter via /sdd-dev-workflow lot-07-interface-web
+Itération 3 : éditeur, coloration syntaxique, synchronisation éditeur/REPL, layout responsive + modes colonnes
