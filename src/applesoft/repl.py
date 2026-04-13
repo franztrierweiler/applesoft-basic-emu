@@ -223,6 +223,9 @@ class REPL:
         filename = interp._eval(stmt.filename)
         if not isinstance(filename, str) or not filename:
             raise BasicError(16)  # SYNTAX ERROR
+        # Ajout automatique de l'extension .bas si absente (CA-UC-004-01)
+        if not filename.lower().endswith(".bas"):
+            filename += ".bas"
         content = self.program.detokenize_all()
         self.io.save_file(filename, content + "\n", base_dir=self.file_dir)
 
@@ -232,6 +235,9 @@ class REPL:
         filename = interp._eval(stmt.filename)
         if not isinstance(filename, str) or not filename:
             raise BasicError(16)  # SYNTAX ERROR
+        # Ajout automatique de l'extension .bas si absente (CA-UC-005-01)
+        if not filename.lower().endswith(".bas"):
+            filename += ".bas"
         content = self.io.load_file(filename, base_dir=self.file_dir)
         # Remplacer le programme et réinitialiser
         self.program.clear()

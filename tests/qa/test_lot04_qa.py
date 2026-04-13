@@ -425,6 +425,36 @@ class TestT05Save:
             assert "10" in content
             assert "20" in content
 
+    def test_t05_03_save_auto_bas_extension(self):
+        """T05-03 [🔴] SAVE "TEST" → fichier TEST.bas créé (extension auto)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output: list[str] = []
+            io = IOBridgeCLI()
+            io.print_str = lambda text: output.append(text)
+
+            repl = REPL(io, file_dir=tmpdir)
+            tokens10 = tokenize('PRINT "A"')
+            repl.program.add_line(10, tokens10)
+
+            _repl_direct(repl, 'SAVE "TEST"')
+            filepath = os.path.join(tmpdir, "TEST.bas")
+            assert os.path.exists(filepath), f"Expected TEST.bas, got {os.listdir(tmpdir)}"
+
+    def test_t05_04_save_no_double_extension(self):
+        """T05-04 [🟠] SAVE "PROG.BAS" → pas de double extension .BAS.bas."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output: list[str] = []
+            io = IOBridgeCLI()
+            io.print_str = lambda text: output.append(text)
+
+            repl = REPL(io, file_dir=tmpdir)
+            tokens10 = tokenize('PRINT "A"')
+            repl.program.add_line(10, tokens10)
+
+            _repl_direct(repl, 'SAVE "PROG.BAS"')
+            assert os.path.exists(os.path.join(tmpdir, "PROG.BAS"))
+            assert not os.path.exists(os.path.join(tmpdir, "PROG.BAS.bas"))
+
     def test_t05_02_save_no_filename(self):
         """T05-02 [🔴] SAVE sans nom → ?SYNTAX ERROR."""
         output: list[str] = []
@@ -459,6 +489,38 @@ class TestT06Load:
             assert repl.program.has_line(10)
             assert repl.program.has_line(20)
             assert repl.env.get_var("X") == 0
+
+    def test_t06_05_load_auto_bas_extension(self):
+        """T06-05 [🔴] LOAD "TEST" → charge TEST.bas (extension auto)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filepath = os.path.join(tmpdir, "TEST.bas")
+            with open(filepath, "w") as f:
+                f.write('10 PRINT "AUTO"\n')
+
+            output: list[str] = []
+            io = IOBridgeCLI()
+            io.print_str = lambda text: output.append(text)
+
+            repl = REPL(io, file_dir=tmpdir)
+            _repl_direct(repl, 'LOAD "TEST"')
+            assert repl.program.has_line(10)
+
+    def test_t06_06_save_load_roundtrip_no_ext(self):
+        """T06-06 [🔴] SAVE "DEMO" puis LOAD "DEMO" → programme intact."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output: list[str] = []
+            io = IOBridgeCLI()
+            io.print_str = lambda text: output.append(text)
+
+            repl = REPL(io, file_dir=tmpdir)
+            tokens10 = tokenize('PRINT "ROUNDTRIP"')
+            repl.program.add_line(10, tokens10)
+
+            _repl_direct(repl, 'SAVE "DEMO"')
+            _repl_direct(repl, "NEW")
+            assert not repl.program.has_line(10)
+            _repl_direct(repl, 'LOAD "DEMO"')
+            assert repl.program.has_line(10)
 
     def test_t06_02_load_replaces_entirely(self):
         """T06-02 [🔴] LOAD → ancien programme intégralement remplacé."""

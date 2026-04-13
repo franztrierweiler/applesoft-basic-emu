@@ -634,7 +634,7 @@ L'interpréteur exécute les instructions par tranches (time-slicing) pour ne pa
 | # | Direction | Description |
 |---|---|---|
 | 1a | → Utilisateur | Saisit `SAVE "filename"`. |
-| 1b | ← Système | Écrit le programme en mémoire dans le fichier spécifié au format texte. Réaffiche le prompt. |
+| 1b | ← Système | Si le nom ne se termine pas par `.bas`, l'extension est ajoutée automatiquement. Écrit le programme en mémoire dans le fichier au format texte. Réaffiche le prompt. |
 
 **Exceptions :**
 
@@ -643,7 +643,11 @@ L'interpréteur exécute les instructions par tranches (time-slicing) pour ne pa
 | 1a | `SAVE` sans nom de fichier | `?SYNTAX ERROR`. |
 | 1b | Le fichier cible existe déjà | Il est écrasé sans avertissement (fidèle Apple II). |
 
-**Règles de gestion :** Aucune spécifique.
+**Règles de gestion :**
+
+| n° RG | Id étape | Énoncé |
+|---|---|---|
+| — | 1b | L'extension `.bas` est ajoutée automatiquement au nom de fichier si elle est absente. `SAVE "TEST"` et `SAVE "TEST.bas"` produisent le même fichier `TEST.bas`. |
 
 **IHM :** Terminal CLI.
 
@@ -653,7 +657,7 @@ L'interpréteur exécute les instructions par tranches (time-slicing) pour ne pa
 
 **Critères d'acceptation :**
 
-- **CA-UC-004-01 :** Soit le programme `10 PRINT "A"` / `20 PRINT "B"` en mémoire, Quand l'utilisateur saisit `SAVE "TEST.BAS"`, Alors un fichier `TEST.BAS` est créé contenant les deux lignes au format texte.
+- **CA-UC-004-01 :** Soit le programme `10 PRINT "A"` / `20 PRINT "B"` en mémoire, Quand l'utilisateur saisit `SAVE "TEST"`, Alors un fichier `TEST.bas` est créé contenant les deux lignes au format texte. Si le nom fourni ne se termine pas par `.bas`, l'extension est ajoutée automatiquement.
 
 ---
 
@@ -681,7 +685,7 @@ L'interpréteur exécute les instructions par tranches (time-slicing) pour ne pa
 | # | Direction | Description |
 |---|---|---|
 | 1a | → Utilisateur | Saisit `LOAD "filename"`. |
-| 1b | ← Système | Charge le fichier, remplace le programme en mémoire, réinitialise les variables. Réaffiche le prompt. |
+| 1b | ← Système | Si le nom ne se termine pas par `.bas`, l'extension est ajoutée automatiquement. Charge le fichier, remplace le programme en mémoire, réinitialise les variables. Réaffiche le prompt. |
 
 **Exceptions :**
 
@@ -690,7 +694,11 @@ L'interpréteur exécute les instructions par tranches (time-slicing) pour ne pa
 | 1a | `LOAD` sans nom de fichier | `?SYNTAX ERROR`. |
 | 1b | Le fichier n'existe pas | `?FILE NOT FOUND`. |
 
-**Règles de gestion :** Aucune spécifique.
+**Règles de gestion :**
+
+| n° RG | Id étape | Énoncé |
+|---|---|---|
+| — | 1b | L'extension `.bas` est ajoutée automatiquement au nom de fichier si elle est absente. `LOAD "TEST"` et `LOAD "TEST.bas"` chargent le même fichier `TEST.bas`. |
 
 **IHM :** Terminal CLI.
 
@@ -700,8 +708,8 @@ L'interpréteur exécute les instructions par tranches (time-slicing) pour ne pa
 
 **Critères d'acceptation :**
 
-- **CA-UC-005-01 :** Soit un fichier `TEST.BAS` contenant `10 PRINT "A"` / `20 PRINT "B"`, Quand l'utilisateur saisit `LOAD "TEST.BAS"`, Alors le programme en mémoire contient ces deux lignes et les variables précédentes sont effacées.
-- **CA-UC-005-02 :** Soit un programme existant en mémoire, Quand l'utilisateur saisit `LOAD "TEST.BAS"`, Alors l'ancien programme est intégralement remplacé.
+- **CA-UC-005-01 :** Soit un fichier `TEST.bas` contenant `10 PRINT "A"` / `20 PRINT "B"`, Quand l'utilisateur saisit `LOAD "TEST"`, Alors le fichier `TEST.bas` est chargé, le programme en mémoire contient ces deux lignes et les variables précédentes sont effacées. Si le nom fourni ne se termine pas par `.bas`, l'extension est ajoutée automatiquement.
+- **CA-UC-005-02 :** Soit un programme existant en mémoire, Quand l'utilisateur saisit `LOAD "TEST"`, Alors l'ancien programme est intégralement remplacé.
 
 ---
 

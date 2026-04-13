@@ -2,7 +2,7 @@
 
 **Date :** 2026-04-07
 **UC couverts :** UC-004, UC-005, UC-009, UC-015, UC-016, UC-017
-**Nombre de scénarios :** 42
+**Nombre de scénarios :** 46
 
 ## Scénarios
 
@@ -72,6 +72,8 @@
 |---|----------|------|--------|----------|-----------|
 | T05-01 | SAVE "TEST.BAS" → fichier texte créé | Nominal | CA-UC-004-01 | 🔴 Bloquant | test_t05_01_save_creates_file |
 | T05-02 | SAVE sans nom → ?SYNTAX ERROR | Erreur | UC-004 exception 1a | 🔴 Bloquant | test_t05_02_save_no_filename |
+| T05-03 | SAVE "TEST" → fichier TEST.bas créé (extension auto) | Nominal | CA-UC-004-01 | 🔴 Bloquant | test_t05_03_save_auto_bas_extension |
+| T05-04 | SAVE "PROG.BAS" → pas de double extension | Limite | CA-UC-004-01 | 🟠 Majeur | test_t05_04_save_no_double_extension |
 
 ### UC-005 — Charger un programme (LOAD)
 
@@ -81,6 +83,8 @@
 | T06-02 | LOAD → ancien programme intégralement remplacé | Nominal | CA-UC-005-02 | 🔴 Bloquant | test_t06_02_load_replaces_entirely |
 | T06-03 | LOAD fichier inexistant → ?FILE NOT FOUND | Erreur | UC-005 exception 1b | 🔴 Bloquant | test_t06_03_load_file_not_found |
 | T06-04 | LOAD avec path traversal → bloqué (SEC-BP-22) | Sécurité | SEC-BP-22 | 🔴 Bloquant | test_t06_04_load_path_traversal |
+| T06-05 | LOAD "TEST" → charge TEST.bas (extension auto) | Nominal | CA-UC-005-01 | 🔴 Bloquant | test_t06_05_load_auto_bas_extension |
+| T06-06 | SAVE "DEMO" + LOAD "DEMO" → roundtrip sans extension | Nominal | CA-UC-004-01/005-01 | 🔴 Bloquant | test_t06_06_save_load_roundtrip_no_ext |
 
 ## Tests manuels
 

@@ -1,15 +1,15 @@
 # Rapport QA — lot-04-fonctions-affichage-persistance
 
-**Date :** 2026-04-09
+**Date :** 2026-04-10 (re-QA après correctif extension .bas)
 **Lot :** lot-04-fonctions-affichage-persistance
 **Verdict :** ✅ VALIDÉ
 
 ## Résumé
 
-- Tests unitaires (dev) : 500/500 passés
-- Scénarios QA : 46/46 passés
-  - 🔴 Bloquants : 30/30 passés
-  - 🟠 Majeurs : 12/12 passés
+- Tests unitaires (dev) : 724/724 passés
+- Scénarios QA : 50/50 passés
+  - 🔴 Bloquants : 34/34 passés
+  - 🟠 Majeurs : 13/13 passés
   - 🟡 Mineurs : 1/1 passé
 - Revue de code : 3 constats (0 🔴, 1 🟠, 1 🟡) — corrections appliquées
 - Itérations de développement : 1
@@ -20,6 +20,17 @@
 |---|---------|-----------|---------|
 | R01 | `LEFT$("HI",-1)` ne levait pas d'erreur | Ajout `if n < 0: raise BasicError(53)` | interpreter.py:957 |
 | R02 | `MID$("HELLO",2,-1)` ne levait pas d'erreur | Ajout `if length < 0: raise BasicError(53)` | interpreter.py:972 |
+
+## Re-QA 2026-04-10 — correctif extension .bas (CA-UC-004-01, CA-UC-005-01)
+
+4 scénarios ajoutés pour valider l'ajout automatique de l'extension `.bas` sur SAVE/LOAD :
+
+| # | Scénario | Sévérité | Résultat |
+|---|----------|----------|---------|
+| T05-03 | SAVE "TEST" → TEST.bas | 🔴 | ✅ |
+| T05-04 | SAVE "PROG.BAS" → pas de double extension | 🟠 | ✅ |
+| T06-05 | LOAD "TEST" → charge TEST.bas | 🔴 | ✅ |
+| T06-06 | SAVE "DEMO" + LOAD "DEMO" → roundtrip | 🔴 | ✅ |
 
 ## Scénarios en échec
 

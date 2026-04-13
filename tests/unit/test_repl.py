@@ -167,6 +167,26 @@ class TestUC004Save:
             assert "20 " in content
             assert "PRINT" in content
 
+    def test_save_auto_appends_bas_extension(self):
+        """CA-UC-004-01 : SAVE "TEST" → fichier TEST.bas créé (extension auto)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            io = MockIO(['10 PRINT "A"', 'SAVE "TEST"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            filepath = os.path.join(tmpdir, "TEST.bas")
+            assert os.path.exists(filepath), f"Expected TEST.bas in {os.listdir(tmpdir)}"
+
+    def test_save_keeps_existing_bas_extension(self):
+        """SAVE "PROG.BAS" → fichier PROG.BAS (pas de double extension)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            io = MockIO(['10 PRINT "A"', 'SAVE "PROG.BAS"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            filepath = os.path.join(tmpdir, "PROG.BAS")
+            assert os.path.exists(filepath)
+            # Pas de PROG.BAS.bas
+            assert not os.path.exists(os.path.join(tmpdir, "PROG.BAS.bas"))
+
     def test_save_no_filename_error(self):
         """SAVE sans nom → ?SYNTAX ERROR."""
         repl, io = make_repl(['10 PRINT "A"'])
@@ -215,6 +235,36 @@ class TestUC005Load:
             repl = REPL(io, file_dir=tmpdir)
             repl.run()
             assert repl.program.line_numbers() == [100]
+
+    def test_load_auto_appends_bas_extension(self):
+        """CA-UC-005-01 : LOAD "TEST" → charge TEST.bas (extension auto)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filepath = os.path.join(tmpdir, "TEST.bas")
+            with open(filepath, "w") as f:
+                f.write('10 PRINT "AUTO"\n')
+            io = MockIO(['LOAD "TEST"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            assert repl.program.has_line(10)
+
+    def test_load_keeps_existing_bas_extension(self):
+        """LOAD "PROG.BAS" → charge PROG.BAS (pas de double extension)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            filepath = os.path.join(tmpdir, "PROG.BAS")
+            with open(filepath, "w") as f:
+                f.write('10 PRINT "OK"\n')
+            io = MockIO(['LOAD "PROG.BAS"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            assert repl.program.has_line(10)
+
+    def test_save_load_roundtrip_without_extension(self):
+        """SAVE "DEMO" puis LOAD "DEMO" → programme intact."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            io = MockIO(['10 PRINT "ROUNDTRIP"', 'SAVE "DEMO"', "NEW", 'LOAD "DEMO"'])
+            repl = REPL(io, file_dir=tmpdir)
+            repl.run()
+            assert repl.program.has_line(10)
 
     def test_load_file_not_found(self):
         """LOAD fichier inexistant → ?FILE NOT FOUND ERROR."""
