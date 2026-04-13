@@ -161,6 +161,49 @@ header .subtitle {
     min-width: 0;
 }
 
+.editor-container {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+}
+
+.editor-highlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 8px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-y: auto;
+    pointer-events: none;
+    color: transparent;
+    tab-size: 4;
+}
+
+.editor-highlight .keyword {
+    color: #ff6600;
+    font-weight: bold;
+}
+
+.editor-highlight .string-literal {
+    color: #ff33ff;
+}
+
+.editor-highlight .number-literal {
+    color: #66ccff;
+}
+
+.editor-highlight .remark {
+    color: var(--fg-dim);
+    font-style: italic;
+}
+
 .editor-textarea {
     flex: 1;
     width: 100%;
@@ -174,6 +217,8 @@ header .subtitle {
     resize: none;
     outline: none;
     tab-size: 4;
+    /* Let text show through, overlay renders colors behind */
+    caret-color: var(--fg-white);
 }
 
 .editor-textarea::placeholder {

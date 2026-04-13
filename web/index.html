@@ -34,8 +34,11 @@
     <main id="main-layout" class="main-layout">
         <section id="editor-section" class="panel editor-panel">
             <h2 class="panel-title">Editor</h2>
-            <textarea id="editor" class="editor-textarea" spellcheck="false"
-                      placeholder="Enter your Applesoft BASIC program here..."></textarea>
+            <div class="editor-container">
+                <div id="editor-highlight" class="editor-highlight" aria-hidden="true"></div>
+                <textarea id="editor" class="editor-textarea" spellcheck="false"
+                          placeholder="Enter your Applesoft BASIC program here..."></textarea>
+            </div>
         </section>
 
         <section id="console-section" class="panel console-panel">

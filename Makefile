@@ -1,4 +1,4 @@
-.PHONY: help install test lint run clean
+.PHONY: help install test lint run clean web
 
 help: ## Afficher cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -19,6 +19,9 @@ format: ## Formater le code avec ruff
 
 run: ## Lancer l'émulateur
 	python3 -m applesoft
+
+web: ## Lancer l'émulateur web (serveur local sur le port 8000)
+	python3 -m http.server 8000 --directory web/
 
 clean: ## Nettoyer les fichiers générés
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

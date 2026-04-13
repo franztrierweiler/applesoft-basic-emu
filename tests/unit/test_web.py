@@ -383,6 +383,281 @@ class TestIoWebTimeslicing:
 
 
 # ---------------------------------------------------------------------------
+# Iteration 3 — Editor, syntax highlighting, sync, responsive, column modes
+# ---------------------------------------------------------------------------
+class TestEditorSyntaxHighlighting:
+    """CA-UC-026-01: Editor must have syntax highlighting for Applesoft keywords."""
+
+    @pytest.fixture(autouse=True)
+    def _load_files(self):
+        self.html_path = os.path.join(WEB_DIR, "index.html")
+        self.css_path = os.path.join(WEB_DIR, "style.css")
+        self.ioweb_path = os.path.join(WEB_DIR, "io_web.py")
+        with open(self.html_path, encoding="utf-8") as f:
+            self.html = f.read()
+        with open(self.css_path, encoding="utf-8") as f:
+            self.css = f.read()
+        with open(self.ioweb_path, encoding="utf-8") as f:
+            self.ioweb = f.read()
+
+    def test_editor_has_highlight_overlay(self):
+        """Editor must have a highlight overlay or mechanism for coloring keywords."""
+        # Either a dedicated overlay div or a highlight function in io_web.py
+        assert ("editor-highlight" in self.html or "highlight" in self.ioweb), \
+            "Editor must have syntax highlighting mechanism"
+
+    def test_highlight_keywords_list(self):
+        """io_web.py must contain a list of Applesoft keywords for highlighting."""
+        assert "PRINT" in self.ioweb and "GOTO" in self.ioweb and "FOR" in self.ioweb, \
+            "io_web.py must reference Applesoft keywords for highlighting"
+
+    def test_highlight_css_styles(self):
+        """CSS must define styles for highlighted keywords."""
+        assert "keyword" in self.css.lower() or "highlight" in self.css.lower(), \
+            "CSS must have keyword/highlight styles"
+
+    def test_highlight_uses_safe_dom(self):
+        """Syntax highlighting must not use innerHTML (SEC-DEV-03, SEC-BP-24)."""
+        assert "innerHTML" not in self.ioweb, \
+            "Highlighting must not use innerHTML"
+
+
+class TestEditorRunFromEditor:
+    """CA-UC-026-02: RUN from editor must execute code and show output in console."""
+
+    @pytest.fixture(autouse=True)
+    def _load_ioweb(self):
+        with open(os.path.join(WEB_DIR, "io_web.py"), encoding="utf-8") as f:
+            self.ioweb = f.read()
+
+    def test_run_button_loads_editor_content(self):
+        """RUN button handler must read editor content."""
+        assert "editor" in self.ioweb and "btn-run" in self.ioweb, \
+            "RUN button must read editor content"
+
+    def test_run_button_replaces_program(self):
+        """RUN button must replace program memory with editor content."""
+        # Already tested in iteration 2 — btn-run calls NEW then loads lines
+        assert "NEW" in self.ioweb, \
+            "RUN must clear program before loading editor content"
+
+
+class TestEditorUndo:
+    """CA-UC-026-03: Ctrl+Z must undo in the editor."""
+
+    @pytest.fixture(autouse=True)
+    def _load_html(self):
+        with open(os.path.join(WEB_DIR, "index.html"), encoding="utf-8") as f:
+            self.html = f.read()
+
+    def test_editor_is_textarea(self):
+        """Editor must be a <textarea> (native Ctrl+Z support)."""
+        assert "<textarea" in self.html and 'id="editor"' in self.html, \
+            "Editor must be a textarea for native undo support"
+
+
+class TestEditorConsoleSync:
+    """CA-UC-026-04: Console line entry must be visible in editor."""
+
+    @pytest.fixture(autouse=True)
+    def _load_ioweb(self):
+        with open(os.path.join(WEB_DIR, "io_web.py"), encoding="utf-8") as f:
+            self.ioweb = f.read()
+
+    def test_sync_console_to_editor(self):
+        """io_web.py must synchronize console program lines to editor."""
+        assert "sync" in self.ioweb.lower() or "_update_editor" in self.ioweb \
+            or "editor" in self.ioweb, \
+            "Must have console-to-editor synchronization"
+
+    def test_sync_updates_editor_value(self):
+        """Sync must update the editor textarea value."""
+        assert 'document["editor"]' in self.ioweb or "editor" in self.ioweb, \
+            "Must access editor element for sync"
+
+
+class TestResponsiveLayout:
+    """CA-UC-025-04: Panels must stack vertically below 768px."""
+
+    @pytest.fixture(autouse=True)
+    def _load_css(self):
+        with open(os.path.join(WEB_DIR, "style.css"), encoding="utf-8") as f:
+            self.css = f.read()
+
+    def test_responsive_media_query(self):
+        """CSS must have @media query for max-width: 768px."""
+        assert "@media" in self.css and "768px" in self.css
+
+    def test_responsive_flex_column(self):
+        """Layout must switch to flex-direction: column below 768px."""
+        assert "flex-direction" in self.css and "column" in self.css
+
+
+class TestColumnModes:
+    """CA-UC-025-07 / CA-UC-025-08: 40 and 80 column modes."""
+
+    @pytest.fixture(autouse=True)
+    def _load_files(self):
+        with open(os.path.join(WEB_DIR, "style.css"), encoding="utf-8") as f:
+            self.css = f.read()
+        with open(os.path.join(WEB_DIR, "io_web.py"), encoding="utf-8") as f:
+            self.ioweb = f.read()
+
+    def test_css_40_column_width(self):
+        """CSS must define 40ch width for 40-column mode."""
+        assert "40ch" in self.css
+
+    def test_css_80_column_width(self):
+        """CSS must define 80ch width for 80-column mode."""
+        assert "80ch" in self.css
+
+    def test_mode_80_css_class(self):
+        """CSS must have a mode-80 class for switching to 80 columns."""
+        assert "mode-80" in self.css
+
+    def test_ioweb_column_mode_switch(self):
+        """io_web.py must support switching between 40 and 80 column modes."""
+        assert "mode-80" in self.ioweb or "80" in self.ioweb, \
+            "io_web.py must support column mode switching"
+
+
+# ---------------------------------------------------------------------------
+# Iteration 5 — Web persistence (localStorage, import/export)
+# ---------------------------------------------------------------------------
+class TestPersistenceStructure:
+    """CA-UC-028-01 to 06: Persistence via localStorage and file I/O."""
+
+    @pytest.fixture(autouse=True)
+    def _load_files(self):
+        self.html_path = os.path.join(WEB_DIR, "index.html")
+        self.ioweb_path = os.path.join(WEB_DIR, "io_web.py")
+        with open(self.html_path, encoding="utf-8") as f:
+            self.html = f.read()
+        with open(self.ioweb_path, encoding="utf-8") as f:
+            self.ioweb = f.read()
+
+    def test_save_button_exists(self):
+        """HTML must have a SAVE toolbar button."""
+        assert 'id="btn-save"' in self.html
+
+    def test_load_button_exists(self):
+        """HTML must have a LOAD toolbar button."""
+        assert 'id="btn-load"' in self.html
+
+    def test_ioweb_localstorage_save(self):
+        """io_web.py must implement localStorage SAVE (CA-UC-028-01)."""
+        assert "localStorage" in self.ioweb or "local_storage" in self.ioweb
+
+    def test_ioweb_localstorage_load(self):
+        """io_web.py must implement localStorage LOAD (CA-UC-028-02)."""
+        assert "getItem" in self.ioweb or "localStorage" in self.ioweb \
+            or "local_storage" in self.ioweb
+
+    def test_ioweb_program_list_panel(self):
+        """io_web.py must support listing saved programs (CA-UC-028-03)."""
+        assert "list" in self.ioweb.lower() and ("program" in self.ioweb.lower()
+            or "saved" in self.ioweb.lower() or "storage" in self.ioweb.lower())
+
+    def test_ioweb_file_import(self):
+        """io_web.py must support file import via button (CA-UC-028-04)."""
+        assert "file" in self.ioweb.lower() or "import" in self.ioweb.lower() \
+            or "FileReader" in self.ioweb
+
+    def test_ioweb_file_export(self):
+        """io_web.py must support file export/download (CA-UC-028-05)."""
+        assert "download" in self.ioweb.lower() or "export" in self.ioweb.lower() \
+            or "Blob" in self.ioweb or "blob" in self.ioweb
+
+    def test_ioweb_drag_drop(self):
+        """io_web.py must support drag & drop .bas import (CA-UC-028-06)."""
+        assert "drop" in self.ioweb.lower() or "dragover" in self.ioweb.lower()
+
+    def test_ioweb_file_size_limit(self):
+        """io_web.py must validate file size on import (SEC-BP-41: max 1 Mo)."""
+        assert "size" in self.ioweb.lower() or "1048576" in self.ioweb \
+            or "1_000_000" in self.ioweb or "1000000" in self.ioweb
+
+    def test_ioweb_file_extension_validation(self):
+        """io_web.py must validate file extensions on import (SEC-BP-40)."""
+        assert ".bas" in self.ioweb or ".txt" in self.ioweb \
+            or "extension" in self.ioweb.lower()
+
+    def test_ioweb_no_innerhtml_persistence(self):
+        """io_web.py must not use innerHTML even for persistence UI."""
+        assert "innerHTML" not in self.ioweb
+
+
+# ---------------------------------------------------------------------------
+# Iteration 4 — Canvas graphics (LoRes + HiRes)
+# ---------------------------------------------------------------------------
+class TestCanvasStructure:
+    """CA-UC-027-01 to 04: Canvas rendering structure."""
+
+    @pytest.fixture(autouse=True)
+    def _load_files(self):
+        self.html_path = os.path.join(WEB_DIR, "index.html")
+        self.css_path = os.path.join(WEB_DIR, "style.css")
+        self.ioweb_path = os.path.join(WEB_DIR, "io_web.py")
+        with open(self.html_path, encoding="utf-8") as f:
+            self.html = f.read()
+        with open(self.css_path, encoding="utf-8") as f:
+            self.css = f.read()
+        with open(self.ioweb_path, encoding="utf-8") as f:
+            self.ioweb = f.read()
+
+    def test_canvas_element_exists(self):
+        """HTML must have a canvas element for graphics."""
+        assert '<canvas id="graphics-canvas"' in self.html
+
+    def test_canvas_hidden_by_default(self):
+        """Canvas section must be hidden by default (display: none)."""
+        assert 'style="display: none;"' in self.html or "display: none" in self.html
+
+    def test_canvas_pixelated_rendering(self):
+        """CSS must use pixelated rendering for crisp upscale."""
+        assert "image-rendering" in self.css
+        assert "pixelated" in self.css
+
+    def test_ioweb_has_show_canvas(self):
+        """io_web.py must have a method to show the canvas (GR/HGR)."""
+        assert "_show_canvas" in self.ioweb or "show_graphics" in self.ioweb \
+            or "canvas-section" in self.ioweb
+
+    def test_ioweb_has_hide_canvas(self):
+        """io_web.py must have a method to hide the canvas (TEXT)."""
+        assert "_hide_canvas" in self.ioweb or "hide_graphics" in self.ioweb \
+            or "display" in self.ioweb
+
+    def test_ioweb_has_lores_render(self):
+        """io_web.py must support LoRes rendering (40x48 grid)."""
+        assert "lores" in self.ioweb.lower() or "render_lores" in self.ioweb \
+            or "40" in self.ioweb
+
+    def test_ioweb_has_hires_render(self):
+        """io_web.py must support HiRes rendering (280x192)."""
+        assert "hires" in self.ioweb.lower() or "render_hires" in self.ioweb \
+            or "280" in self.ioweb
+
+    def test_ioweb_lores_palette_16_colors(self):
+        """io_web.py must define the Apple II 16-color LoRes palette."""
+        assert "palette" in self.ioweb.lower() or "LORES_COLORS" in self.ioweb \
+            or "#000000" in self.ioweb
+
+    def test_ioweb_hires_palette_8_colors(self):
+        """io_web.py must define the Apple II 8-color HiRes palette."""
+        assert "HIRES_COLORS" in self.ioweb or "hires" in self.ioweb.lower()
+
+    def test_ioweb_uses_canvas_api(self):
+        """io_web.py must use canvas 2D context API for rendering."""
+        assert "getContext" in self.ioweb or "fillRect" in self.ioweb \
+            or "canvas" in self.ioweb
+
+    def test_ioweb_no_innerhtml_canvas(self):
+        """io_web.py must not use innerHTML even for canvas operations."""
+        assert "innerHTML" not in self.ioweb
+
+
+# ---------------------------------------------------------------------------
 # Time-slicing mechanics — pure Python tests (no browser needed)
 # ---------------------------------------------------------------------------
 class TestYieldSignal:

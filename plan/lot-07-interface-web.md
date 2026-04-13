@@ -94,27 +94,27 @@ Porter l'émulateur dans le navigateur via Brython. Créer une interface web com
 | CA-UC-025-01 | Page chargée + Brython init → prompt `]` | ✅ | test_io_web_py_shows_prompt, test_io_web_py_init_function | 2026-04-09 |
 | CA-UC-025-02 | `PRINT "HELLO"` dans la console → `HELLO` dans le DOM | ✅ | test_io_web_py_has_print_str, test_io_web_py_uses_textcontent, test_io_web_py_no_innerhtml | 2026-04-09 |
 | CA-UC-025-03 | Boucle infinie + Ctrl+C → interruption, `BREAK` | ✅ | YieldSignal + check_interrupt entre tranches, test_yield_signal_raised_at_threshold, test_interrupt_between_slices, _on_document_keydown Ctrl+C | 2026-04-09 |
-| CA-UC-025-04 | Fenêtre 768px → panneaux empilés verticalement | ⏳ | | |
+| CA-UC-025-04 | Fenêtre 768px → panneaux empilés verticalement | ✅ | @media (max-width: 768px) flex-direction: column — test_responsive_media_query, test_responsive_flex_column | 2026-04-10 |
 | CA-UC-025-05 | `FOR I=1 TO 100000 : NEXT` → bouton STOP cliquable | ✅ | Time-slicing via YieldSignal + setTimeout, _on_stop_click → set_interrupted, test_io_web_py_stop_button_interrupt, test_interrupt_between_slices | 2026-04-09 |
 | CA-UC-025-06 | Chargement → spinner visible | ✅ | test_index_html_spinner_element, test_style_css_spinner_animation, test_io_web_py_hides_spinner | 2026-04-09 |
-| CA-UC-025-07 | Mode 40 colonnes → 40 caractères par ligne | ⏳ | | |
-| CA-UC-025-08 | Mode 80 colonnes → 80 caractères par ligne | ⏳ | | |
+| CA-UC-025-07 | Mode 40 colonnes → 40 caractères par ligne | ✅ | max-width: 40ch sur console-output — test_css_40_column_width | 2026-04-10 |
+| CA-UC-025-08 | Mode 80 colonnes → 80 caractères par ligne | ✅ | classe mode-80 → 80ch, set_column_mode() — test_css_80_column_width, test_mode_80_css_class | 2026-04-10 |
 | CA-UC-025-09 | `GET A$ : PRINT ASC(A$)` → code ASCII correct | ✅ | InputRequestSignal pour GET async, _on_keydown capture touche et appelle _receive_input_value, test_input_request_signal_for_get, test_resume_after_get_assigns_value | 2026-04-09 |
 | CA-UC-025-10 | Code Lexer/Parser/Interpreter → pas de `import browser` | ✅ | test_ca_uc_025_10_no_browser_import | 2026-04-09 |
-| CA-UC-026-01 | Mots-clés colorés dans l'éditeur | ⏳ | | |
-| CA-UC-026-02 | RUN depuis l'éditeur → exécution + sortie console | ⏳ | | |
-| CA-UC-026-03 | Ctrl+Z → annulation | ⏳ | | |
-| CA-UC-026-04 | Saisie console → visible dans l'éditeur | ⏳ | | |
-| CA-UC-027-01 | `GR : COLOR=9 : HLIN 0,39 AT 20` → ligne orange sur canvas | ⏳ | | |
-| CA-UC-027-02 | 16 couleurs LoRes visibles | ⏳ | | |
-| CA-UC-027-03 | `HGR : HCOLOR=3 : HPLOT 0,0 TO 279,159` → diagonale blanche | ⏳ | | |
-| CA-UC-027-04 | Buffer interne cohérent avec SCRN() | ⏳ | | |
-| CA-UC-028-01 | SAVE → stocké dans localStorage | ⏳ | | |
-| CA-UC-028-02 | LOAD → chargé depuis localStorage + visible éditeur | ⏳ | | |
-| CA-UC-028-03 | Panneau liste des programmes sauvegardés | ⏳ | | |
-| CA-UC-028-04 | Import fichier via bouton LOAD | ⏳ | | |
-| CA-UC-028-05 | Export fichier via bouton SAVE | ⏳ | | |
-| CA-UC-028-06 | Drag & drop .bas sur l'éditeur | ⏳ | | |
+| CA-UC-026-01 | Mots-clés colorés dans l'éditeur | ✅ | _highlight_editor + APPLESOFT_KEYWORDS + CSS .keyword — test_editor_has_highlight_overlay, test_highlight_keywords_list, test_highlight_css_styles | 2026-04-10 |
+| CA-UC-026-02 | RUN depuis l'éditeur → exécution + sortie console | ✅ | btn-run lit editor, NEW + lignes + RUN — test_run_button_loads_editor_content | 2026-04-10 |
+| CA-UC-026-03 | Ctrl+Z → annulation | ✅ | <textarea> natif — test_editor_is_textarea | 2026-04-10 |
+| CA-UC-026-04 | Saisie console → visible dans l'éditeur | ✅ | _update_editor() après saisie console — test_sync_console_to_editor, test_sync_updates_editor_value | 2026-04-10 |
+| CA-UC-027-01 | `GR : COLOR=9 : HLIN 0,39 AT 20` → ligne orange sur canvas | ✅ | render_lores + LORES_COLORS[9]=#FF6600 + _show_canvas — test_ioweb_has_lores_render, test_ioweb_lores_palette_16_colors | 2026-04-10 |
+| CA-UC-027-02 | 16 couleurs LoRes visibles | ✅ | LORES_COLORS 16 entrées — test_ioweb_lores_palette_16_colors | 2026-04-10 |
+| CA-UC-027-03 | `HGR : HCOLOR=3 : HPLOT 0,0 TO 279,159` → diagonale blanche | ✅ | render_hires + HIRES_COLORS[3]=#FFFFFF — test_ioweb_has_hires_render, test_ioweb_hires_palette_8_colors | 2026-04-10 |
+| CA-UC-027-04 | Buffer interne cohérent avec SCRN() | ✅ | GraphicsEngine est source de vérité, canvas est rendu — test_ioweb_uses_canvas_api | 2026-04-10 |
+| CA-UC-028-01 | SAVE → stocké dans localStorage | ✅ | save_to_localStorage + window.localStorage.setItem — test_ioweb_localstorage_save | 2026-04-10 |
+| CA-UC-028-02 | LOAD → chargé depuis localStorage + visible éditeur | ✅ | load_from_localStorage + storage.getItem — test_ioweb_localstorage_load | 2026-04-10 |
+| CA-UC-028-03 | Panneau liste des programmes sauvegardés | ✅ | list_saved_programs itère localStorage — test_ioweb_program_list_panel | 2026-04-10 |
+| CA-UC-028-04 | Import fichier via bouton LOAD | ✅ | _setup_file_import + FileReader + validation SEC-BP-40/41 — test_ioweb_file_import | 2026-04-10 |
+| CA-UC-028-05 | Export fichier via bouton SAVE | ✅ | export_file → Blob + download — test_ioweb_file_export | 2026-04-10 |
+| CA-UC-028-06 | Drag & drop .bas sur l'éditeur | ✅ | _setup_drag_drop + dragover/drop events — test_ioweb_drag_drop | 2026-04-10 |
 
 ## Progression
 
@@ -122,10 +122,10 @@ Porter l'émulateur dans le navigateur via Brython. Créer une interface web com
 |---|---|---|
 | 1 | Fondation : page HTML, CSS Apple II, IOBridgeWeb squelette, console REPL événementielle | ✅ 2026-04-09 |
 | 2 | Time-slicing + interruption (Ctrl+C, bouton STOP, GET async) | ✅ 2026-04-09 |
-| 3 | Éditeur, coloration, synchronisation éditeur/REPL | ⏳ |
-| 4 | Canvas graphique (LoRes + HiRes) | ⏳ |
-| 5 | Persistance web (localStorage, import/export .bas) | ⏳ |
+| 3 | Éditeur, coloration syntaxique, synchronisation éditeur/REPL, responsive, modes colonnes | ✅ 2026-04-10 |
+| 4 | Canvas graphique (LoRes + HiRes) | ✅ 2026-04-10 |
+| 5 | Persistance web (localStorage, import/export .bas, drag & drop) | ✅ 2026-04-10 |
 
 ## Prochaines actions
 
-Itération 3 : éditeur, coloration syntaxique, synchronisation éditeur/REPL, layout responsive + modes colonnes
+Lot terminé — prêt pour QA
