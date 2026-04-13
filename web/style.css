@@ -1,7 +1,19 @@
 /* Applesoft BASIC Emulator — Apple II aesthetic (RG-0012)
  * No external dependencies.
- * Default mode: 40 columns.
+ * REPL-only interface with authentic Apple II font.
  */
+
+/* ------------------------------------------------------------------ */
+/* Apple II font (RG-0012)                                            */
+/* ------------------------------------------------------------------ */
+@font-face {
+    font-family: "Apple II";
+    src: url("fonts/apple2.woff2?v=4") format("woff2"),
+         url("fonts/apple2.ttf?v=4") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
 
 /* ------------------------------------------------------------------ */
 /* Reset & base                                                       */
@@ -16,8 +28,8 @@
     --bg: #000;
     --fg-green: #33ff33;
     --fg-white: #fff;
-    --fg-dim: #888;
-    --font-mono: "Courier New", "Lucida Console", monospace;
+    --fg-dim: #555;
+    --font-apple2: "Apple II", "Courier New", "Lucida Console", monospace;
     --col-width-40: 40ch;
     --col-width-80: 80ch;
     --panel-border: 1px solid #333;
@@ -31,9 +43,9 @@ html, body {
     height: 100%;
     background-color: var(--bg);
     color: var(--fg-green);
-    font-family: var(--font-mono);
+    font-family: var(--font-apple2);
     font-size: 16px;
-    line-height: 1.4;
+    line-height: 1.2;
 }
 
 /* ------------------------------------------------------------------ */
@@ -77,28 +89,6 @@ html, body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Header                                                             */
-/* ------------------------------------------------------------------ */
-header {
-    padding: 8px 16px;
-    border-bottom: var(--panel-border);
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-}
-
-header h1 {
-    font-size: 18px;
-    color: var(--fg-white);
-    font-weight: bold;
-}
-
-header .subtitle {
-    font-size: 14px;
-    color: var(--fg-dim);
-}
-
-/* ------------------------------------------------------------------ */
 /* Toolbar                                                            */
 /* ------------------------------------------------------------------ */
 .toolbar {
@@ -111,7 +101,7 @@ header .subtitle {
 }
 
 .toolbar-btn {
-    font-family: var(--font-mono);
+    font-family: var(--font-apple2);
     font-size: 13px;
     color: var(--fg-green);
     background-color: var(--btn-bg);
@@ -130,13 +120,14 @@ header .subtitle {
 }
 
 /* ------------------------------------------------------------------ */
-/* Main layout — editor left, console right (CA-UC-025-04 responsive) */
+/* Main layout — REPL console full screen                             */
 /* ------------------------------------------------------------------ */
 .main-layout {
     display: flex;
+    flex-direction: column;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 110px);
+    height: calc(100vh - 50px);
 }
 
 .panel {
@@ -145,87 +136,7 @@ header .subtitle {
     overflow: hidden;
 }
 
-.panel-title {
-    font-size: 12px;
-    color: var(--fg-dim);
-    padding: 4px 8px;
-    border-bottom: var(--panel-border);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Editor panel */
-.editor-panel {
-    flex: 1;
-    border-right: var(--panel-border);
-    min-width: 0;
-}
-
-.editor-container {
-    position: relative;
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-}
-
-.editor-highlight {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 8px;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-all;
-    overflow-y: auto;
-    pointer-events: none;
-    color: transparent;
-    tab-size: 4;
-}
-
-.editor-highlight .keyword {
-    color: #ff6600;
-    font-weight: bold;
-}
-
-.editor-highlight .string-literal {
-    color: #ff33ff;
-}
-
-.editor-highlight .number-literal {
-    color: #66ccff;
-}
-
-.editor-highlight .remark {
-    color: var(--fg-dim);
-    font-style: italic;
-}
-
-.editor-textarea {
-    flex: 1;
-    width: 100%;
-    background-color: #0a0a0a;
-    color: var(--fg-white);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    line-height: 1.5;
-    padding: 8px;
-    border: none;
-    resize: none;
-    outline: none;
-    tab-size: 4;
-    /* Let text show through, overlay renders colors behind */
-    caret-color: var(--fg-white);
-}
-
-.editor-textarea::placeholder {
-    color: var(--fg-dim);
-}
-
-/* Console panel */
+/* Console panel — full width REPL */
 .console-panel {
     flex: 1;
     min-width: 0;
@@ -237,9 +148,9 @@ header .subtitle {
     flex: 1;
     overflow-y: auto;
     padding: 8px;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    line-height: 1.4;
+    font-family: var(--font-apple2);
+    font-size: 16px;
+    line-height: 1.2;
     color: var(--fg-green);
     background-color: var(--bg);
     white-space: pre-wrap;
@@ -261,8 +172,8 @@ header .subtitle {
 
 .console-prompt {
     color: var(--fg-green);
-    font-family: var(--font-mono);
-    font-size: 14px;
+    font-family: var(--font-apple2);
+    font-size: 16px;
     white-space: pre;
 }
 
@@ -270,8 +181,8 @@ header .subtitle {
     flex: 1;
     background-color: transparent;
     color: var(--fg-green);
-    font-family: var(--font-mono);
-    font-size: 14px;
+    font-family: var(--font-apple2);
+    font-size: 16px;
     border: none;
     outline: none;
     caret-color: var(--fg-green);
@@ -289,7 +200,7 @@ header .subtitle {
 
 /* Canvas panel (hidden by default) */
 .canvas-panel {
-    border-left: var(--panel-border);
+    border-top: var(--panel-border);
 }
 
 #graphics-canvas {
@@ -299,36 +210,14 @@ header .subtitle {
 }
 
 /* ------------------------------------------------------------------ */
-/* Footer                                                             */
-/* ------------------------------------------------------------------ */
-footer {
-    padding: 4px 16px;
-    border-top: var(--panel-border);
-    text-align: center;
-    font-size: 11px;
-    color: var(--fg-dim);
-}
-
-/* ------------------------------------------------------------------ */
 /* Responsive: stack vertically below 768px (CA-UC-025-04)            */
 /* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
     .main-layout {
-        flex-direction: column;
         height: auto;
     }
 
-    .editor-panel {
-        border-right: none;
-        border-bottom: var(--panel-border);
-        max-height: 40vh;
-    }
-
     .console-panel {
-        max-height: 50vh;
-    }
-
-    .editor-textarea {
-        min-height: 150px;
+        max-height: 80vh;
     }
 }

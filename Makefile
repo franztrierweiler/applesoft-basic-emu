@@ -21,6 +21,7 @@ run: ## Lancer l'émulateur
 	python3 -m applesoft
 
 web: ## Lancer l'émulateur web (serveur local sur le port 8000)
+	@test -L web/applesoft || ln -sf ../src/applesoft web/applesoft
 	python3 -m http.server 8000 --directory web/
 
 clean: ## Nettoyer les fichiers générés

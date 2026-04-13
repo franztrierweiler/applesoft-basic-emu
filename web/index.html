@@ -5,22 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Applesoft BASIC — Apple II Emulator</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Brython files to be added: brython.js, brython_stdlib.js -->
     <script src="brython.js"></script>
     <script src="brython_stdlib.js"></script>
 </head>
-<body onload="brython({debug: 0, pythonpath: ['.']})" id="app">
+<body onload="brython({debug: 1, pythonpath: ['.']})" id="app">
 
     <!-- Spinner displayed during Brython initialization (CA-UC-025-06) -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
         <p class="loading-text">Loading Applesoft BASIC Emulator...</p>
     </div>
-
-    <header>
-        <h1>Applesoft BASIC</h1>
-        <span class="subtitle">Apple II Emulator</span>
-    </header>
 
     <nav id="toolbar" class="toolbar">
         <button id="btn-run" class="toolbar-btn" title="Run program (RUN)">RUN</button>
@@ -32,17 +26,7 @@
     </nav>
 
     <main id="main-layout" class="main-layout">
-        <section id="editor-section" class="panel editor-panel">
-            <h2 class="panel-title">Editor</h2>
-            <div class="editor-container">
-                <div id="editor-highlight" class="editor-highlight" aria-hidden="true"></div>
-                <textarea id="editor" class="editor-textarea" spellcheck="false"
-                          placeholder="Enter your Applesoft BASIC program here..."></textarea>
-            </div>
-        </section>
-
         <section id="console-section" class="panel console-panel">
-            <h2 class="panel-title">Console</h2>
             <div id="console-output" class="console-output" tabindex="0"></div>
             <div id="console-input-line" class="console-input-line">
                 <span id="console-prompt" class="console-prompt"></span>
@@ -52,14 +36,9 @@
         </section>
 
         <section id="canvas-section" class="panel canvas-panel" style="display: none;">
-            <h2 class="panel-title">Graphics</h2>
             <canvas id="graphics-canvas" width="280" height="192"></canvas>
         </section>
     </main>
-
-    <footer>
-        <p>Applesoft BASIC Emulator &mdash; Spec Driven Development project</p>
-    </footer>
 
     <script type="text/python" src="io_web.py"></script>
 
