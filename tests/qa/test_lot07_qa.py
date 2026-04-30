@@ -96,12 +96,13 @@ class TestUC025:
         with pytest.raises(YieldSignal):
             interp.run()
 
-    def test_t07_06_spinner_loading(self, html, css, ioweb):
-        """T07-06 [🟡] Spinner visible pendant chargement."""
-        assert "loading-overlay" in html
-        assert "spinner" in html
-        assert "@keyframes" in css
-        assert "hidden" in ioweb and "loading-overlay" in ioweb
+    def test_t07_06_boot_screen_animation(self, html, css, ioweb):
+        """T07-06 [🟡] Boot-screen damier visible au démarrage (remplace
+        le spinner Brython, ext. LookAppleII UC-FID-003)."""
+        assert "boot-screen" in html
+        assert "@keyframes boot-fill" in css or "boot-running" in css
+        assert "boot-screen" in ioweb
+        assert "boot-running" in ioweb
 
     def test_t07_07_mode_40_columns(self, css):
         """T07-07 [🟠] Mode 40 colonnes → 40ch."""

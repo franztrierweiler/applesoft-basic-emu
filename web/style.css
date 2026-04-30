@@ -49,9 +49,12 @@ html, body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Loading spinner (CA-UC-025-06)                                     */
+/* Apple II startup sequence (CA-UC-025-06 dépréciée — pas de spinner) */
 /* ------------------------------------------------------------------ */
-.loading-overlay {
+
+/* Écran copyright affiché ~1 s avant le damier de boot, accompagné d'un
+   bip Web Audio. Texte centré en police Apple II vert phosphore. */
+.copyright-screen {
     position: fixed;
     top: 0;
     left: 0;
@@ -59,33 +62,53 @@ html, body {
     height: 100%;
     background-color: var(--bg);
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 9998;
 }
 
-.loading-overlay.hidden {
+.copyright-screen.hidden {
     display: none;
 }
 
-.spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--fg-dim);
-    border-top-color: var(--fg-green);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.loading-text {
-    margin-top: 16px;
+.copyright-text {
     color: var(--fg-green);
-    font-size: 14px;
+    font-family: var(--font-apple2);
+    font-size: 24px;
+    letter-spacing: 0.05em;
+}
+
+/* Apple II boot screen — damier plein écran qui se révèle ligne par ligne
+   en 0,8 s avant la bannière APPLE ][. Même pattern que le curseur
+   (RG-FID-0001) mais étendu à toute la page. L'animation utilise clip-path
+   avec steps(24) pour un dévoilement discret de haut en bas en 24 paliers
+   (≈ 1 ligne Apple II par palier, 33 ms chacun). */
+.boot-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2' shape-rendering='crispEdges'><rect width='1' height='1' fill='%2333ff33'/><rect x='1' y='1' width='1' height='1' fill='%2333ff33'/></svg>");
+    background-size: 4px 4px;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+    z-index: 9998;
+    clip-path: inset(0 0 100% 0);
+}
+
+.boot-screen.boot-running {
+    animation: boot-fill 0.8s steps(24) forwards;
+}
+
+@keyframes boot-fill {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+.boot-screen.hidden {
+    display: none;
 }
 
 /* ------------------------------------------------------------------ */
@@ -94,7 +117,7 @@ html, body {
 .toolbar {
     display: flex;
     gap: 12px;
-    padding: 10px 16px 12px 16px;
+    padding: 6px 16px 7px 16px;
     background-color: var(--toolbar-bg);
     border-bottom: var(--panel-border);
     flex-wrap: wrap;
@@ -172,14 +195,14 @@ html, body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Main layout — REPL console full screen                             */
+/* Main layout — REPL console à gauche, canvas graphique à droite     */
 /* ------------------------------------------------------------------ */
 .main-layout {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 42px);
 }
 
 .panel {
@@ -188,12 +211,29 @@ html, body {
     overflow: hidden;
 }
 
-/* Console panel — full width REPL */
+/* Console panel — par défaut elle prend toute la place disponible
+   (cas où le canvas est masqué : seule dans le flex container).
+   Quand le canvas est actif, la classe `.canvas-active` la rétrécit
+   à une bande étroite pour libérer un maximum de pixels au graphique. */
 .console-panel {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
     display: flex;
     flex-direction: column;
+}
+
+/* Mode graphique actif : la console se réduit à ~24 colonnes Apple II.
+   Suffisant pour afficher prompts, READY, ?XXX ERROR — les lignes
+   plus longues passent à la ligne. */
+.main-layout.canvas-active .console-panel {
+    flex: 0 0 calc(24ch + 16px);
+}
+
+/* Mode 80 colonnes (CA-UC-025-07) : si le canvas est masqué, la console
+   occupe déjà toute la largeur, rien à faire. Si le canvas est actif,
+   on autorise quand même le mode 80 colonnes en élargissant la bande. */
+.main-layout.canvas-active:has(.console-output.mode-80) .console-panel {
+    flex: 0 0 calc(var(--col-width-80) + 16px);
 }
 
 .console-output {
@@ -209,6 +249,14 @@ html, body {
     word-break: break-all;
     /* Default 40 columns mode (CA-UC-025-07) */
     max-width: var(--col-width-40);
+    /* Aspect Apple II : pas de barre d'ascenseur visible.
+       Le défilement reste actif (molette / clavier) pour ne pas perdre
+       l'historique qui remonte au-delà de la zone visible. */
+    scrollbar-width: none; /* Firefox */
+}
+
+.console-output::-webkit-scrollbar {
+    display: none; /* WebKit/Blink */
 }
 
 .console-output.mode-80 {
@@ -222,21 +270,27 @@ html, body {
     white-space: pre;
 }
 
-/* Blinking block cursor — authentic Apple II look.
- * The cursor is a non-breaking space styled with an inverse-video background,
- * so it inherits the exact character-cell metrics (no alignment drift). */
+/* Apple II cursor — character ROM $7F : 1-pixel checkerboard (damier).
+ * Le contenu de la balise est un &nbsp; rendu invisible (color: transparent),
+ * la cellule porte un motif damier via un SVG inline répété en background.
+ * shape-rendering=crispEdges + image-rendering: pixelated gardent les pixels nets.
+ * Le clignotement (~2 Hz) alterne entre damier visible et invisible. */
 .console-cursor {
-    background-color: var(--fg-green);
-    color: var(--fg-green);
-    animation: blink-block 0.5s step-end infinite;
+    color: transparent;
+    background-color: transparent;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2' shape-rendering='crispEdges'><rect width='1' height='1' fill='%2333ff33'/><rect x='1' y='1' width='1' height='1' fill='%2333ff33'/></svg>");
+    background-size: 4px 4px;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+    animation: blink-cursor 0.5s step-end infinite;
 }
 
 .console-cursor.cursor-hidden {
     visibility: hidden;
 }
 
-@keyframes blink-block {
-    50% { background-color: transparent; }
+@keyframes blink-cursor {
+    50% { opacity: 0; }
 }
 
 /* Invisible capture input — keeps focus & receives keystrokes.
@@ -260,23 +314,35 @@ html, body {
     overflow: hidden;
 }
 
-/* Canvas panel (hidden by default) */
+/* Canvas panel — récupère toute la largeur que la console ne consomme
+   pas (la console étant calée sur 40/80 ch). Pas de padding pour que
+   le canvas occupe physiquement le maximum de pixels. */
 .canvas-panel {
-    border-top: var(--panel-border);
+    flex: 1 1 auto;
+    min-width: 0;
+    border-left: var(--panel-border);
+    padding: 0;
+    align-items: center;
+    justify-content: center;
 }
 
+/* Le canvas exploite tout l'espace disponible du panneau dans la limite
+   du ratio intrinsèque (HiRes 280×192 ≈ 1,46:1 ; LoRes 40×48 est rendu
+   sur le même cadre logique 280×192 côté io_web.py). `max-width:100%`
+   et `max-height:100%` couplés à `aspect-ratio` garantissent que le
+   canvas grandit jusqu'à toucher l'un des deux bords (largeur ou
+   hauteur) tout en restant proportionné. `width:auto; height:auto`
+   laisse les contraintes max-* dimensionner le rendu. */
 #graphics-canvas {
     background-color: var(--bg);
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    width: 560px;
-    height: 384px;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 280 / 192;
     display: block;
-    margin: 8px auto;
-}
-
-.canvas-panel {
-    padding: 8px;
+    margin: 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -284,10 +350,16 @@ html, body {
 /* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
     .main-layout {
+        flex-direction: column;
         height: auto;
     }
 
     .console-panel {
         max-height: 80vh;
+    }
+
+    .canvas-panel {
+        border-left: none;
+        border-top: var(--panel-border);
     }
 }

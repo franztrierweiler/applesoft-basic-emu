@@ -4,7 +4,7 @@ Version : 1.1
 Date : 2026-04-30
 Auteur : Franz / Claude
 Statut : Validé
-Spec de référence : SPEC-racine-ApplesoftBasicEmu.md v3.0 + SPEC-extension-ApplesoftBasicEmu-LookAppleII.md v1.0
+Spec de référence : SPEC-racine-ApplesoftBasicEmu.md v3.1 + SPEC-extension-ApplesoftBasicEmu-LookAppleII.md v1.0
 
 ## 1. Vue d'ensemble
 
@@ -671,7 +671,7 @@ Les termes métier (Applesoft BASIC, Apple II, Brython, REPL, etc.) sont défini
 
 | Document | Description | Relation |
 |----------|-------------|----------|
-| SPEC-racine-ApplesoftBasicEmu.md v3.0 | Spécification SDD racine — 28 UC, 15 RG, 5 ENF | Source des exigences |
+| SPEC-racine-ApplesoftBasicEmu.md v3.1 | Spécification SDD racine — 28 UC, 15 RG, 5 ENF | Source des exigences |
 | SPEC-extension-ApplesoftBasicEmu-LookAppleII.md v1.0 | Extension fonctionnelle (préfixe FID) — 4 UC, 10 RG, 1 ENF | Source des exigences additionnelles intégrées en v1.1 |
 | GRAMMAR.md | Grammaire EBNF complète Applesoft BASIC | Référence pour le Lexer et le Parser |
 | DEPLOYMENT.md | Procédures de déploiement et d'opération | Consomme l'architecture |

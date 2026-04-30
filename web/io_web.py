@@ -316,9 +316,14 @@ class IOBridgeWeb:
     ]
 
     def _show_canvas(self, width, height):
-        """Show the graphics canvas and set its logical size."""
+        """Show the graphics canvas and set its logical size.
+
+        Pose la classe `canvas-active` sur main-layout pour que la CSS
+        rétrécisse la console et libère un maximum de place au canvas.
+        """
         canvas_section = document["canvas-section"]
         canvas_section.style.display = "flex"
+        document["main-layout"].classList.add("canvas-active")
         canvas = document["graphics-canvas"]
         canvas.width = width
         canvas.height = height
@@ -326,6 +331,7 @@ class IOBridgeWeb:
     def _hide_canvas(self):
         """Hide the graphics canvas (called on TEXT command)."""
         document["canvas-section"].style.display = "none"
+        document["main-layout"].classList.remove("canvas-active")
 
     def _invalidate_canvas_cache(self):
         """Force a full repaint on next render_*_delta call (mode change)."""
@@ -546,11 +552,13 @@ class IOBridgeWeb:
             self._show_prompt("]")
 
     def _on_reset_click(self, event):
-        """RESET button — full reboot, like Apple ][ power-cycle.
+        """RESET button — full power-cycle reboot, identical to a fresh
+        page load: the complete startup sequence replays (écran copyright
+        + bip, damier de boot, bannière APPLE ][).
 
         Aborts any running program, clears program + variables (`NEW`),
-        exits graphics mode, blanks the screen, and prints the iconic
-        boot banner.
+        exits graphics mode, blanks the screen, then plays the full
+        boot animation.
         """
         if not hasattr(self, "_repl") or self._repl is None:
             return
@@ -569,9 +577,7 @@ class IOBridgeWeb:
         self._invalidate_canvas_cache()
         self.clear_screen()
         self._console_input.value = ""
-        # Cosmetic boot banner — homage to the original power-on sequence.
-        self.print_str("APPLE ][\n\n")
-        self._show_prompt("]")
+        _play_boot_sequence(self)
 
     # -- Initialization --
 
@@ -581,6 +587,13 @@ class IOBridgeWeb:
         self._setup_file_import()
 
         def on_load(event):
+            # Force-reset la valeur de l'input avant d'ouvrir le picker.
+            # Sans cela, sélectionner deux fois de suite le même fichier
+            # (typiquement après un RESET pour recharger le programme
+            # précédemment ouvert) ne déclenche pas l'événement `change` :
+            # le picker s'ouvre, l'utilisateur sélectionne, mais rien
+            # ne se passe car la valeur n'a pas changé.
+            self._file_input.value = ""
             self._file_input.click()
 
         document["btn-load"].bind("click", on_load)
@@ -648,14 +661,78 @@ def init():
 
         repl.graphics.set_on_draw(_web_on_draw)
     except Exception as e:
-        io.print_str("Error initializing REPL: " + str(e) + "\n")
+        io.print_str("ERROR INITIALIZING REPL: " + str(e) + "\n")
 
     io._bind_toolbar()
+    _play_boot_sequence(io)
 
-    loading = document["loading-overlay"]
-    loading.classList.add("hidden")
 
-    io._show_prompt("]")
+def _play_boot_sequence(io):
+    """Joue la séquence de démarrage Apple II complète.
+
+    Appelée au chargement initial de la page, et rejouée à l'identique
+    par le bouton RESET pour mimer un power-cycle complet.
+
+    Étapes :
+      1. Écran copyright "(C) 1977 APPLE COMPUTER" + bip Web Audio ~1 s.
+      2. Damier plein écran qui se révèle ligne par ligne en 0,8 s
+         (animation CSS clip-path + steps(24)).
+      3. Maintenir le damier complet visible ~0,5 s pour que l'utilisateur
+         perçoive l'écran entièrement rempli.
+      4. Effacement instantané du damier.
+      5. Bannière APPLE ][ + prompt + curseur damier clignotant.
+    """
+    copyright_screen = document["copyright-screen"]
+    boot_screen = document["boot-screen"]
+
+    # Réinitialise les classes : indispensable au RESET, sinon une animation
+    # déjà jouée n'est pas relancée (l'animation CSS ne se redéclenche que
+    # sur l'ajout de la classe `boot-running`).
+    boot_screen.classList.add("hidden")
+    boot_screen.classList.remove("boot-running")
+    copyright_screen.classList.remove("hidden")
+
+    # Bip Web Audio — onde carrée 1 kHz pendant 250 ms (timbre rétro Apple II).
+    # AudioContext peut être suspendu par la politique d'autoplay du navigateur ;
+    # on tente, on ignore silencieusement en cas d'échec.
+    try:
+        AudioCtx = getattr(window, "AudioContext", None) or getattr(window, "webkitAudioContext", None)
+        if AudioCtx is not None:
+            ctx = AudioCtx.new()
+            osc = ctx.createOscillator()
+            osc.type = "square"
+            osc.frequency.value = 1000
+            gain = ctx.createGain()
+            gain.gain.value = 0.3
+            osc.connect(gain)
+            gain.connect(ctx.destination)
+            osc.start()
+            osc.stop(ctx.currentTime + 0.25)
+    except Exception:
+        pass
+
+    def _start_boot():
+        copyright_screen.classList.add("hidden")
+        boot_screen.classList.remove("hidden")
+        boot_screen.classList.add("boot-running")
+
+    def _finish_boot():
+        boot_screen.classList.add("hidden")
+        boot_screen.classList.remove("boot-running")
+        # État totalement frais en sortie de boot — équivalent à un
+        # rechargement de page. Sans ce reset explicite, le drapeau
+        # `_interrupted` armé par RESET resterait à True et le premier
+        # programme lancé après reboot s'arrêterait immédiatement.
+        io._interrupted = False
+        io.print_str("APPLE ][\n\n")
+        io._show_prompt("]")
+
+    # Timing :
+    #   t=0      : écran copyright + bip
+    #   t=1000ms : passage au damier (animation 0,8 s)
+    #   t=1000+1300=2300ms : effacement + bannière
+    timer.set_timeout(_start_boot, 1000)
+    timer.set_timeout(_finish_boot, 2300)
 
 
 init()

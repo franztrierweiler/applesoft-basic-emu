@@ -4,7 +4,7 @@
 > |---|---|
 > | **Document** | SPEC-racine-ApplesoftBasicEmu.md |
 > | **UUID** | `2b869c75-5a70-4d4d-b37a-ea55e40dee02` |
-> | **Version** | 3.0 |
+> | **Version** | 3.1 |
 > | **Date** | 2026-04-30 |
 > | **Auteur** | Franz (Olaqin) / Claude (Anthropic) |
 > | **Statut** | Validé |
@@ -15,6 +15,7 @@
 
 | Version | Date | Auteur | Modifications |
 |---|---|---|---|
+| 3.1 | 2026-04-30 | Franz / Claude | Dépréciation de CA-UC-025-06 (spinner Brython visible pendant le chargement) — le spinner a été retiré de l'implémentation au profit du boot-screen damier Apple II défini dans l'extension SPEC-extension-ApplesoftBasicEmu-LookAppleII v1.0 (UC-FID-003). L'identifiant CA-UC-025-06 est conservé barré pour traçabilité. Aucun autre changement : 28 UC, 15 RG, 5 ENF inchangés. |
 | 3.0 | 2026-04-30 | Franz / Claude | Migration de format vers le standard skill v2.5.0 : renommage `SPEC.md` → `SPEC-racine-ApplesoftBasicEmu.md`, cartouche tableau avec UUID v4, type et skill générateur, arborescence des cas d'utilisation en trois vues (carte d'ensemble, fiches paquetage, diagramme Mermaid), section "Phases du projet" → "Phases de livraison" avec matrice de traçabilité UC↔Phase. Aucune modification sémantique : 28 UC, 15 RG, 5 ENF, identifiants et contenu inchangés. |
 | 2.0 | 2026-04-06 | Franz / Claude | Restructuration complète : passage d'une organisation par domaines/EXG à une organisation par cas d'utilisation (UC). Correction syntaxe LIST (tiret → virgule). 28 UC, 15 RG, 5 ENF. |
 | 1.0 | 2026-02-14 | Franz / Claude | Version initiale (82 EXG par domaines techniques). |
@@ -2051,7 +2052,7 @@ L'interpréteur exécute les instructions par tranches (time-slicing) pour ne pa
 - **CA-UC-025-03 :** Soit un programme en boucle infinie, Quand Ctrl+C est pressé, Alors l'exécution est interrompue et `BREAK` est affiché.
 - **CA-UC-025-04 :** Soit la fenêtre redimensionnée à 768px, Quand le layout se réorganise, Alors les panneaux s'empilent verticalement.
 - **CA-UC-025-05 :** Soit `10 FOR I=1 TO 100000 : NEXT`, Quand exécuté, Alors le bouton STOP reste cliquable (UI non bloquée).
-- **CA-UC-025-06 :** Soit un indicateur de chargement, Quand la page se charge, Alors un spinner est visible jusqu'à l'initialisation complète.
+- ~~**CA-UC-025-06 :** Soit un indicateur de chargement, Quand la page se charge, Alors un spinner est visible jusqu'à l'initialisation complète.~~ **[DÉPRÉCIÉ v3.1]** — Remplacé par UC-FID-003 (extension LookAppleII) : la phase de chargement est désormais couverte par un boot-screen damier Apple II qui se révèle ligne par ligne en 0,8 s avant la bannière `APPLE ][`. Aucun spinner n'est plus affiché.
 - **CA-UC-025-07 :** Soit le mode 40 colonnes actif, Quand la console est examinée, Alors exactement 40 caractères tiennent sur une ligne en police Apple II.
 - **CA-UC-025-08 :** Soit le mode 80 colonnes activé, Quand la console est examinée, Alors exactement 80 caractères tiennent sur une ligne.
 - **CA-UC-025-09 :** Soit `10 GET A$ : PRINT ASC(A$)`, Quand l'utilisateur appuie sur `A`, Alors `65` est affiché.

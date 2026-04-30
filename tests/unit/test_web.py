@@ -76,9 +76,9 @@ class TestIndexHtml:
         assert "https://" not in self.content
         assert "http://" not in self.content
 
-    def test_index_html_spinner_element(self):
-        assert "loading-overlay" in self.content
-        assert "spinner" in self.content
+    def test_index_html_boot_screen_element(self):
+        # Spinner retiré au profit du boot-screen damier Apple II.
+        assert "boot-screen" in self.content
 
     def test_index_html_console_output(self):
         assert 'id="console-output"' in self.content
@@ -230,9 +230,11 @@ class TestIoWebPy:
     def test_io_web_py_init_function(self):
         assert "def init():" in self.content
 
-    def test_io_web_py_hides_spinner(self):
-        assert "loading-overlay" in self.content
-        assert "hidden" in self.content
+    def test_io_web_py_boot_screen_animation(self):
+        # Le spinner Brython a été retiré au profit d'un boot-screen damier
+        # qui se révèle ligne par ligne (UC-FID-003 ext. LookAppleII).
+        assert "boot-screen" in self.content
+        assert "boot-running" in self.content
 
     def test_io_web_py_shows_prompt(self):
         assert '"]"' in self.content or "']'" in self.content

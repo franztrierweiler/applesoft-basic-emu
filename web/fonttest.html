@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face {
+    font-family: "Apple II";
+    src: url("fonts/apple2.woff2?v=4") format("woff2"),
+         url("fonts/apple2.ttf?v=4") format("truetype");
+}
+body {
+    background: #000;
+    color: #33ff33;
+    font-family: "Apple II", monospace;
+    font-size: 32px;
+    padding: 40px;
+}
+.fallback { font-family: monospace; color: #888; }
+</style>
+</head>
+<body>
+<p>APPLE II FONT TEST</p>
+<p>ABCDEFGHIJKLM</p>
+<p>NOPQRSTUVWXYZ</p>
+<p>0123456789</p>
+<p>HELLO WORLD</p>
+<p>]10 PRINT "TEST"</p>
+<hr>
+<p class="fallback">Fallback: ABCDEFGHIJKLM (monospace)</p>
+</body>
+</html>

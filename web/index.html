@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Applesoft BASIC — Apple II Emulator</title>
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=17">
     <script src="brython.js"></script>
     <script src="brython_stdlib.js"></script>
 </head>
 <body onload="brython({debug: 1, pythonpath: ['.']})" id="app">
 
-    <!-- Spinner displayed during Brython initialization (CA-UC-025-06) -->
-    <div id="loading-overlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <p class="loading-text">Loading Applesoft BASIC Emulator...</p>
+    <!-- Apple II startup sequence :
+         (1) écran copyright "(C) 1977 APPLE COMPUTER" + bip ~1 s
+         (2) damier plein écran révélé ligne par ligne ~0,8 s
+         (3) damier complet maintenu ~0,5 s
+         (4) bannière APPLE ][ + prompt -->
+    <div id="copyright-screen" class="copyright-screen hidden">
+        <div class="copyright-text">(C) 1977 APPLE COMPUTER</div>
     </div>
+    <div id="boot-screen" class="boot-screen hidden"></div>
 
     <nav id="toolbar" class="toolbar">
         <button id="btn-load" class="toolbar-btn" title="Charger un fichier .bas">LOAD</button>

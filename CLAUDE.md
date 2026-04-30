@@ -37,11 +37,12 @@ docs/SPEC-racine-*.md + extensions + fichiers annexes
 
 Émulateur Applesoft BASIC pour Apple II — projet de démonstration Spec Driven Development (SDD). Toute la documentation est en **français**. Les messages de commit et les commentaires dans le code doivent suivre cette convention.
 
-**Statut :** Spécification v3.0 validée (migration de format vers le standard skill sdd-uc-spec-write v2.5.0). Extension `LookAppleII` v1.0 brouillon (ajustements UI Apple II + tolérance lexicale + perf graphique web tracés au-dessus de la racine). Conception technique : ARCHITECTURE v1.1 validée (intègre l'extension LookAppleII via ADR-007 et notes § 4.2/5), DEPLOYMENT v1.0 et SECURITY v1.0 inchangés (aucun impact). Phase de livraison en cours — les 7 lots sont QA-validés.
+**Statut :** Spécification v3.1 validée (migration de format v3.0 + dépréciation CA-UC-025-06 spinner suite à l'extension LookAppleII). Extension `LookAppleII` v1.0 brouillon (ajustements UI Apple II + tolérance lexicale + perf graphique web tracés au-dessus de la racine). Conception technique : ARCHITECTURE v1.1 validée (intègre l'extension LookAppleII via ADR-007 et notes § 4.2/5), DEPLOYMENT v1.0 et SECURITY v1.0 inchangés (aucun impact). Phase de livraison en cours — les 7 lots sont QA-validés.
 
 # Structure de la documentation
 
-- `docs/SPEC-racine-ApplesoftBasicEmu.md` — Spécification SDD racine structurée par cas d'utilisation (28 UC, 15 RG, 5 ENF, critères d'acceptation CA-UC-XXX-YY) — v3.0 validée
+- `README.md` — Point d'entrée du projet : présentation, démarrage rapide (`make install` / `make run` / `make web`), liste des exemples et renvois vers la documentation SDD
+- `docs/SPEC-racine-ApplesoftBasicEmu.md` — Spécification SDD racine structurée par cas d'utilisation (28 UC, 15 RG, 5 ENF, critères d'acceptation CA-UC-XXX-YY) — v3.1 validée
 - `docs/SPEC-extension-ApplesoftBasicEmu-LookAppleII.md` — Extension fonctionnelle (préfixe `FID`) : apparence web Apple II authentique (pavé clignotant, keycaps, RESET avec bannière de boot), tolérance lexicale sur pseudo-variables `HCOLOR =`, performance du rafraîchissement graphique web (4 UC, 10 RG, 1 ENF) — v1.0 brouillon
 - `docs/GRAMMAR.md` — Grammaire EBNF complète d'Applesoft BASIC (règles de tokenisation, précédence des opérateurs, toutes les productions)
 - `docs/ARCHITECTURE.md` — Architecture détaillée : 14 composants, pipeline Lexer→Parser→Interpreter, architecture en oignon, 7 ADR — v1.1 validée (intègre extension LookAppleII)
