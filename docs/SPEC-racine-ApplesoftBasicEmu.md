@@ -1,14 +1,21 @@
-# AppleSoft BASIC Emulator — Spécification SDD (Cas d'utilisation)
+# AppleSoft BASIC Emulator — Spécification SDD par cas d'utilisation
 
-Version : 2.0
-Date : 2026-04-06
-Auteur : Franz (Olaqin) / Claude (Anthropic)
-Statut : Validé
+> | | |
+> |---|---|
+> | **Document** | SPEC-racine-ApplesoftBasicEmu.md |
+> | **UUID** | `2b869c75-5a70-4d4d-b37a-ea55e40dee02` |
+> | **Version** | 3.0 |
+> | **Date** | 2026-04-30 |
+> | **Auteur** | Franz (Olaqin) / Claude (Anthropic) |
+> | **Statut** | Validé |
+> | **Type** | Document racine |
+> | **Généré par** | sdd-uc-spec-write v2.5.0 |
 
 ## Changelog
 
 | Version | Date | Auteur | Modifications |
 |---|---|---|---|
+| 3.0 | 2026-04-30 | Franz / Claude | Migration de format vers le standard skill v2.5.0 : renommage `SPEC.md` → `SPEC-racine-ApplesoftBasicEmu.md`, cartouche tableau avec UUID v4, type et skill générateur, arborescence des cas d'utilisation en trois vues (carte d'ensemble, fiches paquetage, diagramme Mermaid), section "Phases du projet" → "Phases de livraison" avec matrice de traçabilité UC↔Phase. Aucune modification sémantique : 28 UC, 15 RG, 5 ENF, identifiants et contenu inchangés. |
 | 2.0 | 2026-04-06 | Franz / Claude | Restructuration complète : passage d'une organisation par domaines/EXG à une organisation par cas d'utilisation (UC). Correction syntaxe LIST (tiret → virgule). 28 UC, 15 RG, 5 ENF. |
 | 1.0 | 2026-02-14 | Franz / Claude | Version initiale (82 EXG par domaines techniques). |
 
@@ -34,19 +41,25 @@ Statut : Validé
 |---|---|
 | Utilisateur | Personne qui interagit avec l'émulateur pour écrire, exécuter et déboguer des programmes Applesoft BASIC, en CLI (Phase 1) ou dans le navigateur (Phase 2). |
 
-## Phases du projet
+## Phases de livraison
 
 ### Phase 1 — Interpréteur CLI Python
 
-- **Périmètre :** Parseur et interpréteur Applesoft BASIC en Python, exécutable en ligne de commande. Inclut une boucle interactive (REPL) avec mode direct et mode différé, fidèle au comportement de l'Apple II. Couvre le cœur du langage (variables, expressions, structures de contrôle, entrées/sorties texte) et le graphisme (basse et haute résolution, rendu en mode texte ou export image). Les accès mémoire émulables (PEEK/POKE sur des adresses connues et documentées) sont inclus.
-- **Livrable :** Un interpréteur Applesoft BASIC en Python exécutable en CLI, offrant un mode interactif (REPL) fidèle à l'expérience Apple II.
-- **Dépendances :** Aucune.
+**Périmètre :** UC-001, UC-002, UC-003, UC-004, UC-005, UC-006, UC-007, UC-008, UC-009, UC-010, UC-011, UC-012, UC-013, UC-014, UC-015, UC-016, UC-017, UC-018, UC-019, UC-020, UC-021, UC-022, UC-023, UC-024.
+
+**Livrable :** Un interpréteur Applesoft BASIC en Python exécutable en CLI, offrant un mode interactif (REPL) fidèle à l'expérience Apple II. Couvre le cœur du langage (variables, expressions, structures de contrôle, entrées/sorties texte), le graphisme (basse et haute résolution, rendu en mode texte ou export image) et les accès mémoire émulables (PEEK/POKE sur des adresses connues et documentées).
+
+**Dépendances :** Aucune.
 
 ### Phase 2 — Portage navigateur via Brython
 
-- **Périmètre :** Adaptation de l'interpréteur Phase 1 pour exécution dans un navigateur web via Brython. Interface web intégrant un éditeur de code, une console de sortie texte et un canvas pour le rendu graphique.
-- **Livrable :** Une application web statique (HTML + Brython) offrant la même expérience interactive que la Phase 1.
-- **Dépendances :** Phase 1.
+**Périmètre :** UC-025, UC-026, UC-027, UC-028.
+
+**Livrable :** Une application web statique (HTML + Brython) offrant la même expérience interactive que la Phase 1, avec un REPL navigateur, un éditeur de code, une console texte et un canvas pour le rendu graphique.
+
+**Dépendances :** Phase 1.
+
+**Couverture :** chacun des 28 UC du document figure dans exactement une phase (UC-001 → UC-024 en Phase 1, UC-025 → UC-028 en Phase 2).
 
 ## Architecture
 
@@ -147,36 +160,244 @@ graph LR
 
 ## Arborescence des cas d'utilisation
 
-| Package (niveau 2) | Package (niveau 1) | UC | Intitulé |
-|---|---|---|---|
-| Session interactive | Boucle REPL | UC-001 | Interagir via le REPL |
-| | | UC-002 | Gérer le programme en mémoire |
-| | | UC-003 | Exécuter un programme |
-| | Persistance | UC-004 | Sauvegarder un programme |
-| | | UC-005 | Charger un programme |
-| Langage BASIC | Entrées/Sorties | UC-006 | Afficher des données |
-| | | UC-007 | Saisir des données |
-| | | UC-008 | Utiliser DATA / READ / RESTORE |
-| | | UC-009 | Contrôler l'affichage |
-| | Variables et expressions | UC-010 | Assigner et manipuler des variables |
-| | | UC-011 | Évaluer des expressions |
-| | Structures de contrôle | UC-012 | Brancher l'exécution |
-| | | UC-013 | Boucler |
-| | | UC-014 | Appeler des sous-programmes |
-| | Fonctions | UC-015 | Utiliser les fonctions mathématiques |
-| | | UC-016 | Utiliser les fonctions de chaînes |
-| | | UC-017 | Définir une fonction utilisateur |
-| Graphisme | Basse résolution | UC-018 | Dessiner en basse résolution |
-| | Haute résolution | UC-019 | Dessiner en haute résolution |
-| | | UC-020 | Utiliser les shape tables |
-| | Rendu CLI | UC-021 | Rendre les graphiques en terminal |
-| Accès système | Mémoire émulée | UC-022 | Lire/écrire la mémoire |
-| | Gestion d'erreurs | UC-023 | Gérer les erreurs d'exécution |
-| | | UC-024 | Interrompre l'exécution |
-| Interface web (Phase 2) | Console et interface | UC-025 | Utiliser le REPL dans le navigateur |
-| | | UC-026 | Éditer un programme dans l'éditeur web |
-| | Rendu web | UC-027 | Afficher les graphiques sur canvas |
-| | Persistance web | UC-028 | Sauvegarder/charger via le navigateur |
+5 paquetages racine, profondeur 3 (paquetage racine → sous-paquetage → UC), 28 UC au total. Conforme aux règles structurelles du skill (≤ 7 sous-paquetages par parent, ≤ 10 UC par feuille, profondeur ≤ 4).
+
+### Carte d'ensemble
+
+- **Session interactive** (5 UC)
+  - **Boucle REPL** (3 UC) — UC-001, UC-002, UC-003
+  - **Persistance** (2 UC) — UC-004, UC-005
+- **Langage BASIC** (12 UC)
+  - **Entrées/Sorties** (4 UC) — UC-006, UC-007, UC-008, UC-009
+  - **Variables et expressions** (2 UC) — UC-010, UC-011
+  - **Structures de contrôle** (3 UC) — UC-012, UC-013, UC-014
+  - **Fonctions** (3 UC) — UC-015, UC-016, UC-017
+- **Graphisme** (4 UC)
+  - **Basse résolution** (1 UC) — UC-018
+  - **Haute résolution** (2 UC) — UC-019, UC-020
+  - **Rendu CLI** (1 UC) — UC-021
+- **Accès système** (3 UC)
+  - **Mémoire émulée** (1 UC) — UC-022
+  - **Gestion d'erreurs** (2 UC) — UC-023, UC-024
+- **Interface web (Phase 2)** (4 UC)
+  - **Console et interface** (2 UC) — UC-025, UC-026
+  - **Rendu web** (1 UC) — UC-027
+  - **Persistance web** (1 UC) — UC-028
+
+### Fiches paquetage
+
+#### Paquetage : Session interactive
+
+**Objectif** — Regroupe les UC qui décrivent l'expérience interactive de l'émulateur (boucle REPL, gestion du programme courant, sauvegarde/chargement disque).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| Paquetage | Boucle REPL (3 UC) |
+| Paquetage | Persistance (2 UC) |
+
+#### Paquetage : Boucle REPL
+
+**Objectif** — Interaction texte avec le prompt `]`, exécution mode direct/différé, gestion du programme en mémoire.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-001 — Interagir via le REPL |
+| UC | UC-002 — Gérer le programme en mémoire |
+| UC | UC-003 — Exécuter un programme |
+
+#### Paquetage : Persistance
+
+**Objectif** — Sauvegarde et chargement de programmes BASIC depuis/vers le système de fichiers (Phase 1).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-004 — Sauvegarder un programme |
+| UC | UC-005 — Charger un programme |
+
+#### Paquetage : Langage BASIC
+
+**Objectif** — Cœur du langage Applesoft : I/O texte, variables, expressions, contrôle de flux, fonctions intégrées et utilisateur.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| Paquetage | Entrées/Sorties (4 UC) |
+| Paquetage | Variables et expressions (2 UC) |
+| Paquetage | Structures de contrôle (3 UC) |
+| Paquetage | Fonctions (3 UC) |
+
+#### Paquetage : Entrées/Sorties
+
+**Objectif** — Affichage et saisie texte (PRINT, INPUT, GET, DATA/READ/RESTORE, contrôle d'affichage HOME/HTAB/VTAB/INVERSE).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-006 — Afficher des données |
+| UC | UC-007 — Saisir des données |
+| UC | UC-008 — Utiliser DATA / READ / RESTORE |
+| UC | UC-009 — Contrôler l'affichage |
+
+#### Paquetage : Variables et expressions
+
+**Objectif** — Manipulation des variables scalaires et tableaux, évaluation des expressions arithmétiques, logiques et de chaînes.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-010 — Assigner et manipuler des variables |
+| UC | UC-011 — Évaluer des expressions |
+
+#### Paquetage : Structures de contrôle
+
+**Objectif** — Branchement conditionnel (IF/THEN), boucles (FOR/NEXT), sous-programmes (GOSUB/RETURN, ON GOTO/GOSUB).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-012 — Brancher l'exécution |
+| UC | UC-013 — Boucler |
+| UC | UC-014 — Appeler des sous-programmes |
+
+#### Paquetage : Fonctions
+
+**Objectif** — Fonctions intégrées numériques (INT, ABS, SQR, RND, etc.), fonctions de chaînes (LEFT$, RIGHT$, MID$, etc.) et définition de fonctions utilisateur (DEF FN).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-015 — Utiliser les fonctions mathématiques |
+| UC | UC-016 — Utiliser les fonctions de chaînes |
+| UC | UC-017 — Définir une fonction utilisateur |
+
+#### Paquetage : Graphisme
+
+**Objectif** — Modes graphiques basse résolution (40×48, 16 couleurs) et haute résolution (280×192, 6 couleurs), shape tables et rendu sur terminal CLI.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| Paquetage | Basse résolution (1 UC) |
+| Paquetage | Haute résolution (2 UC) |
+| Paquetage | Rendu CLI (1 UC) |
+
+#### Paquetage : Basse résolution
+
+**Objectif** — Mode LoRes (GR, COLOR=, PLOT, HLIN, VLIN, SCRN).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-018 — Dessiner en basse résolution |
+
+#### Paquetage : Haute résolution
+
+**Objectif** — Mode HiRes (HGR, HGR2, HCOLOR=, HPLOT) et shape tables (DRAW, XDRAW, ROT=, SCALE=).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-019 — Dessiner en haute résolution |
+| UC | UC-020 — Utiliser les shape tables |
+
+#### Paquetage : Rendu CLI
+
+**Objectif** — Restitution des modes graphiques dans un terminal texte (caractères ANSI demi-blocs en LoRes, demi-blocs/Unicode en HiRes).
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-021 — Rendre les graphiques en terminal |
+
+#### Paquetage : Accès système
+
+**Objectif** — Accès mémoire émulée (PEEK/POKE/CALL sur soft-switches), gestion des erreurs runtime et interruption Ctrl+C.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| Paquetage | Mémoire émulée (1 UC) |
+| Paquetage | Gestion d'erreurs (2 UC) |
+
+#### Paquetage : Mémoire émulée
+
+**Objectif** — Adresses Apple II documentées exposées via PEEK/POKE/CALL (RG-0011), avec carte mémoire 64 Ko émulée.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-022 — Lire/écrire la mémoire |
+
+#### Paquetage : Gestion d'erreurs
+
+**Objectif** — Codes d'erreur Applesoft (RG-0010), ONERR GOTO, RESUME, et interruption clavier.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-023 — Gérer les erreurs d'exécution |
+| UC | UC-024 — Interrompre l'exécution |
+
+#### Paquetage : Interface web (Phase 2)
+
+**Objectif** — Adaptation de l'émulateur dans un navigateur via Brython : REPL, éditeur, canvas graphique, persistance localStorage/fichier.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| Paquetage | Console et interface (2 UC) |
+| Paquetage | Rendu web (1 UC) |
+| Paquetage | Persistance web (1 UC) |
+
+#### Paquetage : Console et interface
+
+**Objectif** — REPL navigateur fidèle à l'Apple II et éditeur de code intégré.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-025 — Utiliser le REPL dans le navigateur |
+| UC | UC-026 — Éditer un programme dans l'éditeur web |
+
+#### Paquetage : Rendu web
+
+**Objectif** — Restitution des modes graphiques sur un canvas HTML5.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-027 — Afficher les graphiques sur canvas |
+
+#### Paquetage : Persistance web
+
+**Objectif** — Sauvegarde/chargement de programmes via localStorage et fichiers locaux.
+
+**Contient :**
+
+| Type | Élément |
+|---|---|
+| UC | UC-028 — Sauvegarder/charger via le navigateur |
 
 ## Diagramme des cas d'utilisation — Phase 1
 

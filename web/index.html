@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Applesoft BASIC — Apple II Emulator</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=8">
     <script src="brython.js"></script>
     <script src="brython_stdlib.js"></script>
 </head>
@@ -17,22 +17,20 @@
     </div>
 
     <nav id="toolbar" class="toolbar">
-        <button id="btn-run" class="toolbar-btn" title="Run program (RUN)">RUN</button>
-        <button id="btn-stop" class="toolbar-btn" title="Stop execution (Ctrl+C)">STOP</button>
-        <button id="btn-reset" class="toolbar-btn" title="Reset (NEW)">RESET</button>
-        <button id="btn-list" class="toolbar-btn" title="List program (LIST)">LIST</button>
-        <button id="btn-save" class="toolbar-btn" title="Save program (SAVE)">SAVE</button>
-        <button id="btn-load" class="toolbar-btn" title="Load program (LOAD)">LOAD</button>
+        <button id="btn-load" class="toolbar-btn" title="Charger un fichier .bas">LOAD</button>
+        <button id="btn-stop" class="toolbar-btn btn-stop" title="Interrompre le programme (Ctrl+C)">STOP</button>
+        <button id="btn-reset" class="toolbar-btn btn-reset" title="Redémarrer l'Apple ][ (NEW + clear)">RESET</button>
     </nav>
 
     <main id="main-layout" class="main-layout">
         <section id="console-section" class="panel console-panel">
-            <div id="console-output" class="console-output" tabindex="0"></div>
-            <div id="console-input-line" class="console-input-line">
-                <span id="console-prompt" class="console-prompt"></span>
-                <input id="console-input" class="console-input" type="text"
-                       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            </div>
+            <!-- Single text screen: program output, prompts, typed input and
+                 the blinking cursor all share the same flow, like Apple II. -->
+            <div id="console-output" class="console-output" tabindex="0"
+                 ><span id="console-input-display" class="console-input-display"
+                 ></span><span id="console-cursor" class="console-cursor">&nbsp;</span></div>
+            <input id="console-input" class="console-input" type="text"
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </section>
 
         <section id="canvas-section" class="panel canvas-panel" style="display: none;">

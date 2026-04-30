@@ -93,8 +93,16 @@ class TestIndexHtml:
         assert "<canvas" in self.content
 
     def test_index_html_toolbar_buttons(self):
-        for btn_id in ["btn-run", "btn-stop", "btn-reset", "btn-list", "btn-save", "btn-load"]:
-            assert btn_id in self.content, f"Missing toolbar button: {btn_id}"
+        # Apple II look: LOAD + STOP + RESET (the three keys that have no
+        # equivalent typed BASIC command). RUN/LIST/SAVE/NEW are typed.
+        for btn_id in ("btn-load", "btn-stop", "btn-reset"):
+            assert f'id="{btn_id}"' in self.content, f"Missing toolbar button: {btn_id}"
+
+    def test_index_html_blinking_cursor_elements(self):
+        # Apple II single-screen model: input display + blinking block cursor
+        # live inside console-output (no separate input-line row).
+        assert 'id="console-input-display"' in self.content
+        assert 'id="console-cursor"' in self.content
 
     def test_index_html_io_web_script(self):
         assert 'src="io_web.py"' in self.content
@@ -296,11 +304,13 @@ class TestPersistenceStructure:
         with open(os.path.join(WEB_DIR, "io_web.py"), encoding="utf-8") as f:
             self.ioweb = f.read()
 
-    def test_save_button_exists(self):
-        assert 'id="btn-save"' in self.html
-
     def test_load_button_exists(self):
         assert 'id="btn-load"' in self.html
+
+    def test_save_command_available(self):
+        # SAVE is no longer a toolbar button; it's a typed BASIC command
+        # exposed via the file-export helper used by the interpreter.
+        assert "export_file" in self.ioweb
 
     def test_ioweb_localstorage_save(self):
         assert "localStorage" in self.ioweb

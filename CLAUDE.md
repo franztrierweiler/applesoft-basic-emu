@@ -5,7 +5,7 @@ Ce fichier fournit des instructions à Claude Code (claude.ai/code) pour travail
 ## Processus global
 
 ```
-docs/SPEC.md + fichiers annexes
+docs/SPEC-racine-*.md + extensions + fichiers annexes
        |
        v
 [1. Spécification]──correction──> 🖊️ sdd-uc-spec-write
@@ -31,31 +31,31 @@ docs/SPEC.md + fichiers annexes
        |
        v
 [6. Livraison]
-
 ```
 
 ## Vue d'ensemble du projet
 
 Émulateur Applesoft BASIC pour Apple II — projet de démonstration Spec Driven Development (SDD). Toute la documentation est en **français**. Les messages de commit et les commentaires dans le code doivent suivre cette convention.
 
-**Statut :** Spécification v2.0 validée. Conception technique v1.0 validée (ARCHITECTURE, DEPLOYMENT, SECURITY). Prêt pour la planification.
+**Statut :** Spécification v3.0 validée (migration de format vers le standard skill sdd-uc-spec-write v2.5.0). Extension `LookAppleII` v1.0 brouillon (ajustements UI Apple II + tolérance lexicale + perf graphique web tracés au-dessus de la racine). Conception technique : ARCHITECTURE v1.1 validée (intègre l'extension LookAppleII via ADR-007 et notes § 4.2/5), DEPLOYMENT v1.0 et SECURITY v1.0 inchangés (aucun impact). Phase de livraison en cours — les 7 lots sont QA-validés.
 
-## Structure de la documentation
+# Structure de la documentation
 
-- `docs/SPEC.md` — Spécification SDD structurée par cas d'utilisation (28 UC, 15 RG, 5 ENF, critères d'acceptation CA-UC-XXX-YY) — v2.0 validée
+- `docs/SPEC-racine-ApplesoftBasicEmu.md` — Spécification SDD racine structurée par cas d'utilisation (28 UC, 15 RG, 5 ENF, critères d'acceptation CA-UC-XXX-YY) — v3.0 validée
+- `docs/SPEC-extension-ApplesoftBasicEmu-LookAppleII.md` — Extension fonctionnelle (préfixe `FID`) : apparence web Apple II authentique (pavé clignotant, keycaps, RESET avec bannière de boot), tolérance lexicale sur pseudo-variables `HCOLOR =`, performance du rafraîchissement graphique web (4 UC, 10 RG, 1 ENF) — v1.0 brouillon
 - `docs/GRAMMAR.md` — Grammaire EBNF complète d'Applesoft BASIC (règles de tokenisation, précédence des opérateurs, toutes les productions)
-- `docs/ARCHITECTURE.md` — Architecture détaillée : 14 composants, pipeline Lexer→Parser→Interpreter, architecture en oignon, 6 ADR — v1.0 validée
+- `docs/ARCHITECTURE.md` — Architecture détaillée : 14 composants, pipeline Lexer→Parser→Interpreter, architecture en oignon, 7 ADR — v1.1 validée (intègre extension LookAppleII)
 - `docs/DEPLOYMENT.md` — Déploiement : CLI (script Python) + web (fichier HTML local), releases via tags git — v1.0 validée
 - `docs/SECURITY.md` — Sécurité : modèle de menaces, protection contre injection/path traversal/XSS, Brython embarqué — v1.0 validée
 
-Toujours consulter ces documents avant d'implémenter ou de modifier une fonctionnalité. Les cas d'utilisation et exigences ont des niveaux de priorité (Critique, Important, Souhaité) qui guident l'ordre d'implémentation.
+Toujours consulter ces documents avant d'implémenter ou de modifier une fonctionnalité. Les exigences ont des niveaux de priorité (Critique, Important) qui guident l'ordre d'implémentation.
 
 La documentation évolue au fur et à mesure des phases d'exécution du projet.
 
 ## Méthode de travail pour ce projet
 
 ### Travail au sein de l'équipe
-1- Le fichier SPEC.md et les fichiers référencés par le fichier SPEC.md constituent les documents de référence. Ils sont utilisés en entrée du skill sdd-uc-system-design lors de la phase de mise au point. Si besoin, le skill sdd-uc-spec-write permet de corriger la spécification et les fichiers qu'elle référence.
+1- La spec racine (SPEC-racine-*.md) et ses éventuelles extensions (SPEC-extension-*.md) constituent les documents de référence. Ils sont utilisés en entrée du skill sdd-uc-system-design lors de la phase de mise au point. Si besoin, le skill sdd-uc-spec-write permet de corriger la spécification ou de créer des extensions.
 2- Le skill sdd-uc-system-design est utilisé pour produire les fichiers de conception technique.
 3- La planification est utilisée si et seulement si les fichiers de conception technique sont disponibles.
 
@@ -85,10 +85,11 @@ La documentation évolue au fur et à mesure des phases d'exécution du projet.
 #### Recettes de test (QA)
 Le processus QA est piloté par `/sdd-qa-workflow <lot>`.
 
+
 #### Commandes
 1- Utiliser toujours les commandes Makefile pour les instructions à l'utilisateur (`make test`, `make lint`, `make run`, etc.) plutôt que les commandes brutes (`python`, `pytest`, `ruff`)
 2- Le fichier Makefile est la référence pour installer, tester, linter, exécuter, etc
-3- Au démarrage, si un Makefile existe, afficher qu'il est disponible avec la commande permettant d'afficher l'aide
+3- Au démarrage, afficher qu'un Makefile existe avec la commande permettant d'afficher l'aide
 
 ### Workflow de développement
 Le workflow de développement est piloté par `/sdd-dev-workflow <lot>`.

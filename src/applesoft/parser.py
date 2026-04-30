@@ -147,8 +147,10 @@ class Parser:
             if kw == "FLASH":
                 self._advance()
                 return ast.FlashStmt()
-            if kw == "SPEED=":
+            if kw == "SPEED=" or kw == "SPEED":
                 self._advance()
+                if kw == "SPEED":
+                    self._expect(TokenType.OP, "=")
                 return ast.SpeedStmt(self._parse_expression())
             if kw == "TEXT":
                 self._advance()
@@ -156,8 +158,10 @@ class Parser:
             if kw == "GR":
                 self._advance()
                 return ast.GrStmt()
-            if kw == "COLOR=":
+            if kw == "COLOR=" or kw == "COLOR":
                 self._advance()
+                if kw == "COLOR":
+                    self._expect(TokenType.OP, "=")
                 return ast.ColorStmt(self._parse_expression())
             if kw == "PLOT":
                 return self._parse_plot()
@@ -171,8 +175,10 @@ class Parser:
             if kw == "HGR2":
                 self._advance()
                 return ast.Hgr2Stmt()
-            if kw == "HCOLOR=":
+            if kw == "HCOLOR=" or kw == "HCOLOR":
                 self._advance()
+                if kw == "HCOLOR":
+                    self._expect(TokenType.OP, "=")
                 return ast.HcolorStmt(self._parse_expression())
             if kw == "HPLOT":
                 return self._parse_hplot()
@@ -180,11 +186,15 @@ class Parser:
                 return self._parse_draw()
             if kw == "XDRAW":
                 return self._parse_xdraw()
-            if kw == "ROT=":
+            if kw == "ROT=" or kw == "ROT":
                 self._advance()
+                if kw == "ROT":
+                    self._expect(TokenType.OP, "=")
                 return ast.RotStmt(self._parse_expression())
-            if kw == "SCALE=":
+            if kw == "SCALE=" or kw == "SCALE":
                 self._advance()
+                if kw == "SCALE":
+                    self._expect(TokenType.OP, "=")
                 return ast.ScaleStmt(self._parse_expression())
             if kw == "POKE":
                 return self._parse_poke()

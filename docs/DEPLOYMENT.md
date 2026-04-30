@@ -4,7 +4,7 @@ Version : 1.0
 Date : 2026-04-06
 Auteur : Franz / Claude
 Statut : Validé
-Spec de référence : SPEC.md v2.0
+Spec de référence : SPEC-racine-ApplesoftBasicEmu.md v3.0
 Architecture de référence : ARCHITECTURE.md v1.0
 
 ## 1. Vue d'ensemble du déploiement

@@ -1,30 +1,44 @@
-.PHONY: help install test lint run clean web
+.PHONY: help install test lint format run web clean
 
-help: ## Afficher cette aide
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+help:
+	@echo "Commandes disponibles :"
+	@echo ""
+	@echo "  Développement :"
+	@echo "    make install   Installe le projet et les dépendances dev (pip install -e \".[dev,png]\")"
+	@echo "    make test      Lance les tests unitaires (pytest tests/ -v)"
+	@echo "    make lint      Vérifie le code (ruff check + ruff format --check)"
+	@echo "    make format    Formate le code (ruff format + ruff check --fix)"
+	@echo ""
+	@echo "  Exécution :"
+	@echo "    make run       Lance l'émulateur en mode CLI (python3 -m applesoft)"
+	@echo "    make web       Lance l'émulateur web sur http://localhost:8000"
+	@echo ""
+	@echo "  Maintenance :"
+	@echo "    make help      Affiche cette aide"
+	@echo "    make clean     Nettoie les caches (__pycache__, .pytest_cache, *.pyc)"
 
-install: ## Installer le projet et les dépendances de développement
+install:
 	pip install -e ".[dev,png]"
 
-test: ## Lancer les tests unitaires
+test:
 	python3 -m pytest tests/ -v
 
-lint: ## Vérifier le code avec ruff
+lint:
 	ruff check src/ tests/
 	ruff format --check src/ tests/
 
-format: ## Formater le code avec ruff
+format:
 	ruff format src/ tests/
 	ruff check --fix src/ tests/
 
-run: ## Lancer l'émulateur
+run:
 	python3 -m applesoft
 
-web: ## Lancer l'émulateur web (serveur local sur le port 8000)
+web:
 	@test -L web/applesoft || ln -sf ../src/applesoft web/applesoft
 	python3 -m http.server 8000 --directory web/
 
-clean: ## Nettoyer les fichiers générés
+clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
 	find . -name "*.pyc" -delete 2>/dev/null || true

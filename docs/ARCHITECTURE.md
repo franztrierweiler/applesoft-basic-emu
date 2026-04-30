@@ -1,10 +1,10 @@
 # AppleSoft BASIC Emulator — Architecture
 
-Version : 1.0
-Date : 2026-04-06
+Version : 1.1
+Date : 2026-04-30
 Auteur : Franz / Claude
 Statut : Validé
-Spec de référence : SPEC.md v2.0
+Spec de référence : SPEC-racine-ApplesoftBasicEmu.md v3.0 + SPEC-extension-ApplesoftBasicEmu-LookAppleII.md v1.0
 
 ## 1. Vue d'ensemble
 
@@ -33,8 +33,8 @@ L'acteur unique est l'Utilisateur qui interagit avec l'émulateur pour écrire, 
 
 | Catégorie | Technologie | Version | Rôle | Justification | Alternative écartée | Raison de l'exclusion | Licence |
 |-----------|-------------|---------|------|---------------|--------------------|-----------------------|---------|
-| Langage | Python | 3.10.12+ | Langage principal | Imposé par SPEC.md § Contraintes structurantes | — | Imposé | PSF |
-| Runtime web | Brython | Dernière stable | Exécution Python dans le navigateur (Phase 2) | Imposé par SPEC.md § Contraintes structurantes | Pyodide (WASM) | Plus lourd (~10 Mo vs ~1 Mo), chargement plus lent, non imposé | BSD |
+| Langage | Python | 3.10.12+ | Langage principal | Imposé par SPEC-racine-ApplesoftBasicEmu.md § Contraintes structurantes | — | Imposé | PSF |
+| Runtime web | Brython | Dernière stable | Exécution Python dans le navigateur (Phase 2) | Imposé par SPEC-racine-ApplesoftBasicEmu.md § Contraintes structurantes | Pyodide (WASM) | Plus lourd (~10 Mo vs ~1 Mo), chargement plus lent, non imposé | BSD |
 | Lexer | Fait maison | — | Tokenisation Applesoft (longest match, sans séparateurs) | Grammaire non standard incompatible avec les générateurs classiques (RG-0002) | PLY, ANTLR | Pas de gestion du flux sans séparateurs ni de longest match natif | — |
 | Parser | Recursive descent (fait maison) | — | Construction de l'AST, 9 niveaux de précédence | Contrôle total sur la précédence et les messages d'erreur Applesoft | lark, pyparsing | Dépendances C ou magie interne incompatible Brython | — |
 | Export image | Pillow (PIL) | Dernière stable | Export PNG des graphiques (CLI) | Standard de facto pour le traitement d'image Python | matplotlib | Surdimensionné pour du pixel-level drawing | HPND |
@@ -137,8 +137,8 @@ flowchart TD
 | Composant | Responsabilité | Interfaces exposées | Dépendances | UC couverts | RG implémentées |
 |-----------|---------------|---------------------|-------------|-------------|-----------------|
 | **REPL** | Point d'entrée CLI. Boucle lecture → dispatch (mode direct / mode différé). Gère les commandes système (RUN, LIST, NEW, DEL, SAVE, LOAD, CONT). | `run()` — lance la boucle interactive | Lexer, Parser, Interpreter, Program, Environment, IOBridge | UC-001, UC-002, UC-003, UC-004, UC-005 | RG-0008 |
-| **Lexer** | Tokenise une ligne source selon la correspondance gloutonne Applesoft. Appelé à la saisie (pas à l'exécution). | `tokenize(line) → List[Token]` | Aucune | UC-001 (saisie) | RG-0001, RG-0002, RG-0003, RG-0004, RG-0005 |
-| **Parser** | Recursive descent. Construit l'AST depuis les tokens. 9 niveaux de précédence des opérateurs. | `parse(tokens) → ASTNode` | Aucune | UC-011 (expressions) | — |
+| **Lexer** | Tokenise une ligne source selon la correspondance gloutonne Applesoft. Appelé à la saisie (pas à l'exécution). Table de mots-clés étendue pour accepter les pseudo-variables `HCOLOR`, `COLOR`, `ROT`, `SCALE`, `SPEED` (formes nues, en plus des formes collées `KW=`) — fidélité Applesoft réel (ext. LookAppleII). | `tokenize(line) → List[Token]` | Aucune | UC-001 (saisie), UC-FID-004 (ext. tolérance lexicale) | RG-0001, RG-0002, RG-0003, RG-0004, RG-0005, RG-FID-0009 |
+| **Parser** | Recursive descent. Construit l'AST depuis les tokens. 9 niveaux de précédence des opérateurs. Pour les pseudo-variables (`COLOR`, `HCOLOR`, `ROT`, `SCALE`, `SPEED`) : dispatch sur les deux variants de keyword (forme collée `KW=` et forme nue `KW` + `OP(=)` séparé), produit la même AST node — fidélité Applesoft réel (ext. LookAppleII). | `parse(tokens) → ASTNode` | Aucune | UC-011 (expressions), UC-FID-004 (ext.) | RG-FID-0010 |
 | **Interpreter** | Parcourt l'AST et exécute les instructions. Gère le flux (GOTO, GOSUB, FOR, IF, ONERR). Compteur d'instructions pour yield (time-slicing). | `execute(program, env)`, `step() → bool` | Environment, GraphicsEngine, MemoryMap, IOBridge, NumberFormatter, ErrorHandler, DebugTracer, Program | UC-003, UC-006 à UC-024 | RG-0006, RG-0008, RG-0009, RG-0010, RG-0011 |
 | **Environment** | État d'exécution : variables, tableaux, piles GOSUB/FOR, pointeur DATA, définitions FN, état CONT, état d'erreur, état d'affichage. | `get_var()`, `set_var()`, `push_gosub()`, `pop_gosub()`, `push_for()`, `pop_for()`, `read_data()`, `restore()` | MemoryMap (pour PEEK 222, 218-219) | UC-003, UC-007 à UC-017, UC-023 | RG-0003, RG-0006, RG-0007 |
 | **Program** | Collection de lignes triées par numéro. Stocke les tokens (post-lexer) et l'AST caché (post-parser) par ligne. Détokenisation pour LIST et SAVE. | `add_line()`, `delete_line()`, `get_line()`, `list_lines()`, `detokenize()`, `clear()` | Aucune | UC-001, UC-002, UC-004, UC-005 | — |
@@ -146,7 +146,7 @@ flowchart TD
 | **MemoryMap** | Bytearray 64 Ko. Handlers de soft-switches (RG-0011). Intercept PEEK/POKE/CALL sur adresses documentées. | `peek(addr) → int`, `poke(addr, val)`, `call(addr)` | Environment (accès état pour ERRNUM, ERRLIN) | UC-022 | RG-0011 |
 | **IOBridge** | Interface abstraite d'I/O : print, input, get, clear screen, rendu graphique, signaux, persistance fichier. | `print_str()`, `input_str()`, `get_char()`, `clear_screen()`, `render_graphics()`, `check_interrupt()`, `save_file()`, `load_file()` | — (interface) | Tous les UC impliquant des I/O | — |
 | **IOBridgeCLI** | Implémentation CLI : stdin/stdout, SIGINT → flag d'interruption, codes ANSI + Unicode blocs pour le rendu graphique temps réel, export PNG via Pillow. | Implémente IOBridge | Pillow (optionnel, export PNG) | UC-001 à UC-005, UC-006, UC-007, UC-009, UC-021, UC-024 | — |
-| **IOBridgeWeb** (Phase 2) | Implémentation web : écriture DOM pour la console, événements clavier, canvas HTML5, localStorage. Time-slicing via yield. | Implémente IOBridge | Brython (`browser` module) | UC-025, UC-026, UC-027, UC-028 | RG-0012, RG-0013, RG-0014, RG-0015 |
+| **IOBridgeWeb** (Phase 2) | Implémentation web : modèle DOM « écran unique » où prompt courant, texte tapé et pavé clignotant inverse-vidéo cohabitent inline avec la sortie programme via `insertBefore` (fidélité Apple II — ext. LookAppleII). Toolbar minimaliste 3 boutons keycap (LOAD, STOP, RESET). RESET déclenche une bannière de boot `APPLE ][`. Canvas HTML5 avec rendu différentiel via snapshot + `requestAnimationFrame` (voir ADR-007). Événements clavier, localStorage, time-slicing via yield. | Implémente IOBridge | Brython (`browser` module) | UC-025, UC-026, UC-027, UC-028, UC-FID-001, UC-FID-002, UC-FID-003 (ext.) | RG-0012, RG-0013, RG-0014, RG-0015, RG-FID-0001, RG-FID-0002, RG-FID-0003, RG-FID-0004, RG-FID-0005, RG-FID-0006, RG-FID-0007, RG-FID-0008 |
 | **NumberFormatter** | Formatage des nombres selon les conventions Applesoft : espace pour positif, pas de zéros inutiles, notation scientifique > 9 chiffres. | `format_number(n) → str` | Aucune | UC-006 | RG-0006 |
 | **ErrorHandler** | Table des 17 codes d'erreur Applesoft. Formatage des messages (`?MESSAGE ERROR [IN linenum]`). | `raise_error(code, line=None)`, `get_message(code) → str` | Aucune | UC-023, et tout UC produisant une erreur | RG-0010 |
 | **DebugTracer** | Mode debug : trace d'exécution (ligne courante, instruction, état des variables). Activable par flag CLI `--debug` ou commande REPL `DEBUG ON`/`DEBUG OFF`. | `trace(line, stmt, env)`, `enable()`, `disable()` | IOBridge (pour l'affichage des traces) | Transversal | — |
@@ -439,15 +439,15 @@ stateDiagram-v2
 | Donnée | Source | Format | Procédure de chargement | Fréquence de mise à jour |
 |--------|--------|--------|------------------------|-------------------------|
 | Table des mots réservés | GRAMMAR.md § 6.4 | Liste Python en dur | Constante dans `lexer.py`, triée par longueur décroissante (longest match) | Jamais (fixe) |
-| Table des codes d'erreur | RG-0010 (SPEC.md) | Dict Python en dur | Constante dans `errors.py` | Jamais (fixe) |
-| Table des adresses émulées | RG-0011 (SPEC.md) | Dict Python en dur | Constante dans `memory.py`, handlers enregistrés à l'init | Jamais (fixe) |
+| Table des codes d'erreur | RG-0010 (SPEC-racine-ApplesoftBasicEmu.md) | Dict Python en dur | Constante dans `errors.py` | Jamais (fixe) |
+| Table des adresses émulées | RG-0011 (SPEC-racine-ApplesoftBasicEmu.md) | Dict Python en dur | Constante dans `memory.py`, handlers enregistrés à l'init | Jamais (fixe) |
 | Palette LoRes (16 couleurs) | Apple II reference | Liste de tuples RGB | Constante dans `graphics.py` | Jamais (fixe) |
 | Palette HiRes (8 couleurs) | Apple II reference | Liste de tuples RGB | Constante dans `graphics.py` | Jamais (fixe) |
-| Table CALL → routines | RG-0011 (SPEC.md) | Dict adresse → fonction | Constante dans `memory.py` | Jamais (fixe) |
+| Table CALL → routines | RG-0011 (SPEC-racine-ApplesoftBasicEmu.md) | Dict adresse → fonction | Constante dans `memory.py` | Jamais (fixe) |
 
 ## 5. Propriétés non-fonctionnelles
 
-| Propriété | Seuil / Objectif | Décision architecturale | Référence SPEC.md |
+| Propriété | Seuil / Objectif | Décision architecturale | Référence SPEC-racine-ApplesoftBasicEmu.md |
 |-----------|-----------------|------------------------|-------------------|
 | Portabilité Python/Brython | 0 import C natif dans le cœur | Architecture en oignon : cœur Python pur, IOBridge en périphérie. Script CI de vérification des imports interdits. | ENF-001, CA-ENF-001-01 |
 | Performance boucle CLI | FOR 10 000 itérations < 2s | Cache AST par ligne. Évaluation d'expressions optimisée (pas d'allocation inutile). | ENF-002, CA-ENF-002-01 |
@@ -461,6 +461,7 @@ stateDiagram-v2
 | Portabilité OS | Linux, macOS, Windows Terminal | Cœur OS-agnostique. SIGINT géré par IOBridgeCLI. Codes ANSI supposés supportés. | Besoin implicite |
 | Observabilité (dev) | Trace d'exécution activable | DebugTracer intégré, activable par `--debug` ou `DEBUG ON/OFF` dans le REPL. | Besoin implicite |
 | Rendu graphique CLI | Temps réel, max 30 FPS | Throttle du rafraîchissement terminal. Export PNG pour la haute résolution (mode principal). | UC-021 |
+| Rendu graphique web fluide (≥ 10 fps perçus) | Pas de saccade > 200 ms sur boucle PLOT serrée | Rendu différentiel via snapshot des cellules + planification via `requestAnimationFrame` + `yield_threshold=200` côté interpréteur. Voir ADR-007. | ENF-FID-001 (extension LookAppleII), CA-ENF-FID-001-01 à -03 |
 
 ## 6. Décisions d'architecture
 
@@ -496,7 +497,7 @@ stateDiagram-v2
 
 **Décision :** Option A — Flottants Python natifs. L'affichage est fidèle grâce au NumberFormatter (9 chiffres max, conventions Applesoft).
 
-**Conséquences :** Les programmes Applesoft produisent les mêmes résultats visibles que l'original dans 99%+ des cas. Les cas extrêmes (arithmétique aux limites de précision) peuvent différer. Documenté dans le SPEC.md (ENF-004).
+**Conséquences :** Les programmes Applesoft produisent les mêmes résultats visibles que l'original dans 99%+ des cas. Les cas extrêmes (arithmétique aux limites de précision) peuvent différer. Documenté dans le SPEC-racine-ApplesoftBasicEmu.md (ENF-004).
 
 **Statut :** Décidé
 
@@ -571,12 +572,34 @@ stateDiagram-v2
 
 **Statut :** Décidé
 
+### ADR-007 : Rendu graphique web différentiel avec requestAnimationFrame
+
+**Contexte :** Côté Phase 2 (web), le rendu naïf des modes graphiques (40×48 cellules en LoRes, 280×192 pixels en HiRes) consiste à redessiner intégralement le buffer à chaque appel `on_draw` du `GraphicsEngine`. Sur des programmes en boucle serrée (un PLOT par itération, ex. mosaïque de Raskin), cela génère deux problèmes : (1) chaque tranche d'exécution Brython déclenche des dizaines à des centaines d'appels `fillRect` pour rien (pendant que le thread JS est bloqué, aucun paint navigateur ne survient), (2) la traversée Brython→JS pour chaque appel canvas est coûteuse, ce qui peut faire descendre le rafraîchissement perçu à moins d'une frame toutes les 5 secondes. (Réf. UC-027, ENF-FID-001 ext. LookAppleII)
+
+**Options évaluées :**
+
+| Option | Avantages | Inconvénients |
+|--------|-----------|---------------|
+| A) Rendu naïf (full repaint) à chaque `on_draw` | Implémentation simple | Saccades de plusieurs secondes en boucle PLOT serrée, CPU gaspillée |
+| B) Rendu différentiel (snapshot + diff) à chaque `on_draw` | Réduit les appels `fillRect` aux cellules changées | Toujours appelé à chaque opération graphique, donc toujours bloquant pendant la tranche |
+| C) Mark-dirty + `requestAnimationFrame` + rendu différentiel + yield_threshold réduit | Au plus 1 rendu canvas par frame d'affichage navigateur ; aligné sur le paint navigateur ; rendu seulement les cellules changées | Légèrement plus complexe (3 mécanismes coordonnés) |
+
+**Décision :** Option C — combinaison de trois mécanismes coordonnés côté `IOBridgeWeb` et `Interpreter` :
+
+1. **Snapshot du dernier état rendu** (`_lores_snapshot` 40×48 octets, `_hires_snapshot` 280×192 octets, init à `0xFF` sentinelle pour forcer le premier repaint complet). À chaque rendu, on ne fait `fillRect` que sur les cellules dont la couleur diffère du snapshot, puis on met à jour le snapshot. Reset du cache lors d'un changement de mode (TEXT↔GR↔HGR).
+2. **Découplage `on_draw` ↔ rendu via `requestAnimationFrame`.** Le callback `on_draw` du `GraphicsEngine` ne déclenche plus directement le rendu canvas : il pose un flag `dirty` et planifie un seul `requestAnimationFrame` (idempotent dans la frame). C'est le callback RAF, exécuté entre tranches BASIC juste avant le paint navigateur, qui appelle effectivement `render_lores`/`render_hires`. Conséquence : au plus 1 rendu canvas par frame affichée, indépendamment du nombre d'opérations graphiques exécutées dans la tranche.
+3. **Réduction du `yield_threshold` à 200 instructions** (vs. infini en CLI). Les tranches BASIC plus courtes laissent au navigateur des fenêtres de paint plus fréquentes (≥ 5 par seconde sur les programmes graphiques typiques).
+
+**Conséquences :** Pour `RASKIN2.BAS` (PLOT en boucle infinie), le rafraîchissement perçu passe de < 0,2 fps à ≥ 10 fps (cible ENF-FID-001). Côté CLI, comportement inchangé : le `GraphicsEngine` y conserve son rendu ANSI synchrone. Le snapshot ajoute ~10 Ko de mémoire (40×48 + 280×192 octets) côté web, négligeable. Le découplage RAF n'introduit pas de latence visible : le rendu se produit dans la même frame d'affichage que celle qui aurait eu lieu avec un rendu synchrone, mais sans surcharger le thread.
+
+**Statut :** Décidé (implémenté lot 7, formalisé extension LookAppleII v1.0)
+
 ## 7. Structure du répertoire projet
 
 ```
 applesoft-basic-emu/
 ├── docs/                        # Documents de conception
-│   ├── SPEC.md                  # Spécification SDD (cas d'utilisation)
+│   ├── SPEC-racine-ApplesoftBasicEmu.md                  # Spécification SDD (cas d'utilisation)
 │   ├── GRAMMAR.md               # Grammaire EBNF Applesoft BASIC
 │   ├── ARCHITECTURE.md          # Ce document
 │   ├── DEPLOYMENT.md            # Procédures de déploiement
@@ -630,7 +653,7 @@ applesoft-basic-emu/
 
 ## 8. Glossaire technique
 
-Les termes métier (Applesoft BASIC, Apple II, Brython, REPL, etc.) sont définis dans le glossaire projet du SPEC.md. Seuls les termes architecturaux spécifiques sont documentés ici.
+Les termes métier (Applesoft BASIC, Apple II, Brython, REPL, etc.) sont définis dans le glossaire projet du SPEC-racine-ApplesoftBasicEmu.md. Seuls les termes architecturaux spécifiques sont documentés ici.
 
 | Terme | Définition |
 |-------|-----------|
@@ -639,8 +662,8 @@ Les termes métier (Applesoft BASIC, Apple II, Brython, REPL, etc.) sont défini
 | **AST (dans ce projet)** | Arbre syntaxique produit par le Parser. Chaque nœud représente une construction du langage (expression, instruction, bloc). L'Interpreter parcourt cet arbre pour exécuter le programme. |
 | **Time-slicing** | Découpage de l'exécution en tranches courtes (~50ms). Après chaque tranche, le contrôle est rendu au navigateur pour maintenir la réactivité de l'UI. Implémenté via un compteur d'instructions dans l'Interpreter. |
 | **Throttle** | Limitation de la fréquence d'une opération. Ici : le rafraîchissement du rendu graphique terminal est limité à 30 FPS pour éviter de flood le terminal. |
-| **Soft-switch** | Adresse mémoire Apple II dont la lecture ou l'écriture déclenche un effet de bord matériel (changement de mode vidéo, lecture clavier, etc.). Émulé par des handlers dans MemoryMap. Voir SPEC.md § Glossaire projet. |
-| **Longest match** | Stratégie du Lexer : à chaque position dans le flux de caractères, le mot réservé le plus long possible est choisi. Voir SPEC.md § Glossaire projet. |
+| **Soft-switch** | Adresse mémoire Apple II dont la lecture ou l'écriture déclenche un effet de bord matériel (changement de mode vidéo, lecture clavier, etc.). Émulé par des handlers dans MemoryMap. Voir SPEC-racine-ApplesoftBasicEmu.md § Glossaire projet. |
+| **Longest match** | Stratégie du Lexer : à chaque position dans le flux de caractères, le mot réservé le plus long possible est choisi. Voir SPEC-racine-ApplesoftBasicEmu.md § Glossaire projet. |
 | **IOBridge** | Interface abstraite (protocole Python) définissant les opérations d'entrée/sortie. Deux implémentations : IOBridgeCLI (terminal) et IOBridgeWeb (DOM/canvas). |
 | **Yield** | Point de suspension dans l'exécution de l'Interpreter. En Phase 2, le yield rend le contrôle au navigateur. En Phase 1, le yield est un no-op mais le mécanisme est en place. |
 
@@ -648,7 +671,15 @@ Les termes métier (Applesoft BASIC, Apple II, Brython, REPL, etc.) sont défini
 
 | Document | Description | Relation |
 |----------|-------------|----------|
-| SPEC.md v2.0 | Spécification SDD — 28 UC, 15 RG, 5 ENF | Source des exigences |
+| SPEC-racine-ApplesoftBasicEmu.md v3.0 | Spécification SDD racine — 28 UC, 15 RG, 5 ENF | Source des exigences |
+| SPEC-extension-ApplesoftBasicEmu-LookAppleII.md v1.0 | Extension fonctionnelle (préfixe FID) — 4 UC, 10 RG, 1 ENF | Source des exigences additionnelles intégrées en v1.1 |
 | GRAMMAR.md | Grammaire EBNF complète Applesoft BASIC | Référence pour le Lexer et le Parser |
 | DEPLOYMENT.md | Procédures de déploiement et d'opération | Consomme l'architecture |
 | SECURITY.md | Exigences de sécurité | Contraint l'architecture |
+
+## Changelog
+
+| Version | Date | Auteur | Modifications |
+|---|---|---|---|
+| 1.1 | 2026-04-30 | Franz / Claude | Intégration de l'extension LookAppleII v1.0 : (a) ADR-007 nouveau — stratégie de rendu graphique web différentiel via snapshot + `requestAnimationFrame` + `yield_threshold=200`, traçant ENF-FID-001 ; (b) § 4.2 enrichi — Lexer (RG-FID-0009) et Parser (RG-FID-0010) acceptent les pseudo-variables avec `=` espacé ; IOBridgeWeb (RG-FID-0001 à 0008) intègre le modèle DOM « écran unique », le pavé clignotant inline, le toolbar 3 boutons keycap et la bannière de boot RESET ; (c) § 5 — nouvelle ligne de propriété non-fonctionnelle pour le rafraîchissement web (réf. ENF-FID-001) ; (d) en-tête mis à jour avec la spec d'extension comme référence supplémentaire. Aucune modification du contenu validé v1.0. |
+| 1.0 | 2026-04-06 | Franz / Claude | Version initiale — 14 composants, 6 ADR, pipeline Lexer→Parser→Interpreter, architecture en oignon. |

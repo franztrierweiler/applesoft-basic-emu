@@ -4,7 +4,7 @@ Version : 1.0
 Date : 2026-04-06
 Auteur : Franz / Claude
 Statut : Validé
-Spec de référence : SPEC.md v2.0
+Spec de référence : SPEC-racine-ApplesoftBasicEmu.md v3.0
 Architecture de référence : ARCHITECTURE.md v1.0
 
 ## 1. Vue d'ensemble sécurité
@@ -14,7 +14,7 @@ L'émulateur Applesoft BASIC est une application locale (CLI + fichier HTML ouve
 **Classification des données :** Public (aucune donnée sensible)
 **Exposition réseau :** Isolé (application locale, pas de serveur, pas de communication réseau)
 **Référentiels appliqués :** OWASP Secure Coding Practices (principes de développement sécurisé)
-**Référentiels sectoriels :** Aucun (SPEC.md § Contraintes structurantes : « Aucune contrainte réglementaire ou normative »)
+**Référentiels sectoriels :** Aucun (SPEC-racine-ApplesoftBasicEmu.md § Contraintes structurantes : « Aucune contrainte réglementaire ou normative »)
 
 ## 2. Modèle de menaces
 
@@ -62,7 +62,7 @@ Les sections 4.1 (Authentification), 4.2 (Sessions), 4.3 (Cryptographie), 4.6 (A
 | ID | Exigence | Description | Implémentation | Preuve de conformité | Statut |
 |----|----------|-------------|----------------|----------------------|--------|
 | SEC-BP-20 | Pas d'injection Python | L'interpréteur BASIC ne doit jamais utiliser `eval()`, `exec()`, `compile()` ou `__import__()` pour évaluer du code BASIC | Le Parser produit un AST typé, l'Interpreter parcourt l'AST avec un visiteur dédié. Aucune évaluation dynamique de code Python. | Règle ruff interdisant `eval`/`exec` dans `src/`, revue de code, grep automatisé | ⏳ |
-| SEC-BP-21 | Validation des entrées numériques | Les valeurs passées à PEEK, POKE, CALL, COLOR=, HCOLOR= sont validées dans les plages autorisées avant traitement | Vérification systématique des bornes dans l'Interpreter, `?ILLEGAL QUANTITY ERROR` si hors plage (RG-0010) | Tests unitaires sur les bornes, CA du SPEC.md | ⏳ |
+| SEC-BP-21 | Validation des entrées numériques | Les valeurs passées à PEEK, POKE, CALL, COLOR=, HCOLOR= sont validées dans les plages autorisées avant traitement | Vérification systématique des bornes dans l'Interpreter, `?ILLEGAL QUANTITY ERROR` si hors plage (RG-0010) | Tests unitaires sur les bornes, CA du SPEC-racine-ApplesoftBasicEmu.md | ⏳ |
 | SEC-BP-22 | Path traversal — restriction SAVE/LOAD | SAVE et LOAD sont restreints au répertoire du projet Python. Les chemins absolus, `..`, et les liens symboliques sont refusés. | Résolution du chemin canonique (`os.path.realpath`), vérification que le chemin résolu est sous le répertoire projet, rejet sinon | Tests unitaires avec chemins malveillants (`../../etc/passwd`, `/tmp/evil`, liens symboliques) | ⏳ |
 | SEC-BP-23 | Validation du contenu des fichiers .bas | LOAD ne charge que des fichiers texte contenant des lignes BASIC valides. Les lignes non parsables sont rejetées avec un message d'erreur. | Chaque ligne chargée passe par le Lexer. Les erreurs de tokenisation sont signalées sans arrêter le chargement. | Tests avec fichiers .bas malformés, binaires, encodages invalides | ⏳ |
 | SEC-BP-24 | XSS — échappement DOM (Phase 2) | Tout contenu BASIC affiché dans le DOM (PRINT, LIST, messages d'erreur) est échappé avant insertion | Utilisation de `textContent` (pas `innerHTML`) dans l'IOBridgeWeb pour tout texte provenant de l'interpréteur | Revue de code, tests avec caractères `<script>`, `<img onerror=...>` dans les chaînes BASIC | ⏳ |
@@ -90,7 +90,7 @@ Les sections 4.1 (Authentification), 4.2 (Sessions), 4.3 (Cryptographie), 4.6 (A
 
 ## 5. Exigences de sécurité — Référentiels sectoriels
 
-Non applicable. Le SPEC.md indique explicitement « Aucune contrainte réglementaire ou normative ».
+Non applicable. Le SPEC-racine-ApplesoftBasicEmu.md indique explicitement « Aucune contrainte réglementaire ou normative ».
 
 ## 6. Principes de développement sécurisé
 
@@ -167,7 +167,7 @@ Pas d'obligation légale de notification (pas de données personnelles collecté
 
 ## 10. Conformité et privacy
 
-Non applicable. Le projet ne collecte, ne stocke et ne transmet aucune donnée personnelle. Aucun cadre réglementaire ne s'applique (SPEC.md § Contraintes structurantes).
+Non applicable. Le projet ne collecte, ne stocke et ne transmet aucune donnée personnelle. Aucun cadre réglementaire ne s'applique (SPEC-racine-ApplesoftBasicEmu.md § Contraintes structurantes).
 
 ## 11. Spécificités de sécurité
 

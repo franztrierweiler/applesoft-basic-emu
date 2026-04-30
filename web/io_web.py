@@ -35,7 +35,13 @@ class IOBridgeWeb:
         self._last_key = 0
         self._console_output = document["console-output"]
         self._console_input = document["console-input"]
-        self._console_prompt = document["console-prompt"]
+        self._console_input_display = document["console-input-display"]
+        self._console_cursor = document["console-cursor"]
+        # Snapshots of the last rendered canvas state — for delta rendering.
+        # 0xFF is a sentinel (no valid color) that forces a full repaint on
+        # the first render after a mode change (cf. _invalidate_canvas_cache).
+        self._lores_snapshot = bytearray(b"\xff" * (40 * 48))
+        self._hires_snapshot = bytearray(b"\xff" * (280 * 192))
         self._running = False
         self._waiting_for_input = False
         self._input_kind = None
@@ -44,20 +50,47 @@ class IOBridgeWeb:
 
         # Bind keyboard events for GET support and interrupt
         self._console_input.bind("keydown", self._on_keydown)
+        self._console_input.bind("input", self._on_input_change)
         document.bind("keydown", self._on_document_keydown)
+        # Click anywhere on the console refocuses the hidden input
+        document["console-section"].bind("click", lambda e: self._console_input.focus())
+
+    # -- Prompt + cursor management (Apple II look) --
+
+    def _show_prompt(self, text):
+        """Print the prompt inline in the output flow and reveal the cursor.
+
+        On Apple II, prompts (REPL `]`, `INPUT "?…"`, etc.) appear at the
+        current cursor position in the same screen — not on a separate row.
+        """
+        if text:
+            self.print_str(text)
+        self._console_cursor.classList.remove("cursor-hidden")
+        self._console_input.focus()
+
+    def _hide_prompt(self):
+        """Hide the cursor (program running, no input expected)."""
+        self._console_input_display.textContent = ""
+        self._console_cursor.classList.add("cursor-hidden")
+
+    def _on_input_change(self, event):
+        """Mirror the captured input value into the visible display span."""
+        self._console_input_display.textContent = self._console_input.value
+        self._console_output.scrollTop = self._console_output.scrollHeight
 
     # -- IOBridge protocol methods --
 
     def print_str(self, text):
-        """Write text to the console DOM element.
+        """Write text to the output flow, just before the live input span.
 
-        Uses textContent via createElement + textContent (SEC-DEV-03, SEC-TECH-12).
+        Keeps the input-display + cursor pinned at the visual end of the
+        screen. Uses textContent only (SEC-DEV-03, SEC-TECH-12).
         """
         if not text:
             return
         span = document.createElement("span")
         span.textContent = text
-        self._console_output.appendChild(span)
+        self._console_output.insertBefore(span, self._console_input_display)
         self._console_output.scrollTop = self._console_output.scrollHeight
 
         if "\n" in text:
@@ -72,7 +105,7 @@ class IOBridgeWeb:
         In web mode, INPUT is handled asynchronously via InputRequestSignal.
         """
         if prompt:
-            self.print_str(prompt)
+            self._show_prompt(prompt)
         return ""
 
     def get_char(self):
@@ -83,9 +116,14 @@ class IOBridgeWeb:
         return ""
 
     def clear_screen(self):
-        """Clear the console output."""
+        """Clear the console output, preserving the live input span + cursor."""
+        # Detach display + cursor, wipe everything, re-attach at the end.
         while self._console_output.firstChild:
             self._console_output.removeChild(self._console_output.firstChild)
+        self._console_input_display.textContent = ""
+        self._console_input.value = ""
+        self._console_output.appendChild(self._console_input_display)
+        self._console_output.appendChild(self._console_cursor)
         self._cursor_column = 1
 
     def check_interrupt(self):
@@ -218,6 +256,7 @@ class IOBridgeWeb:
                 line = line.strip()
                 if line:
                     self._repl._process_line(line)
+            self._show_prompt("]")
 
     def _setup_file_import(self):
         """Set up file import via hidden <input type=file> (CA-UC-028-04)."""
@@ -288,27 +327,50 @@ class IOBridgeWeb:
         """Hide the graphics canvas (called on TEXT command)."""
         document["canvas-section"].style.display = "none"
 
+    def _invalidate_canvas_cache(self):
+        """Force a full repaint on next render_*_delta call (mode change)."""
+        for i in range(len(self._lores_snapshot)):
+            self._lores_snapshot[i] = 0xFF
+        for i in range(len(self._hires_snapshot)):
+            self._hires_snapshot[i] = 0xFF
+
     def render_lores(self, buffer):
-        """Render the LoRes 40x48 grid to the canvas."""
+        """Render the LoRes 40x48 grid to the canvas — delta only.
+
+        Accepts a flat bytearray of length 40*48 (as exposed by GraphicsEngine).
+        Only redraws cells whose color differs from the previous snapshot.
+        """
         canvas = document["graphics-canvas"]
         ctx = canvas.getContext("2d")
         cell_w = canvas.width / 40
         cell_h = canvas.height / 48
-        for y in range(48):
-            for x in range(40):
-                color_idx = buffer[y][x] if y < len(buffer) and x < len(buffer[y]) else 0
-                ctx.fillStyle = self.LORES_COLORS[color_idx % 16]
+        snap = self._lores_snapshot
+        for i in range(40 * 48):
+            cur = buffer[i]
+            if cur != snap[i]:
+                y = i // 40
+                x = i - y * 40
+                ctx.fillStyle = self.LORES_COLORS[cur & 0x0F]
                 ctx.fillRect(x * cell_w, y * cell_h, cell_w, cell_h)
+                snap[i] = cur
 
     def render_hires(self, buffer, width=280, height=192):
-        """Render the HiRes 280x192 buffer to the canvas."""
+        """Render the HiRes 280x192 buffer to the canvas — delta only.
+
+        Accepts a flat bytearray of length width*height.
+        """
         canvas = document["graphics-canvas"]
         ctx = canvas.getContext("2d")
-        for y in range(min(height, len(buffer))):
-            for x in range(min(width, len(buffer[y]))):
-                color_idx = buffer[y][x]
-                ctx.fillStyle = self.HIRES_COLORS[color_idx % 8]
+        snap = self._hires_snapshot
+        n = width * height
+        for i in range(n):
+            cur = buffer[i]
+            if cur != snap[i]:
+                y = i // width
+                x = i - y * width
+                ctx.fillStyle = self.HIRES_COLORS[cur & 0x07]
                 ctx.fillRect(x, y, 1, 1)
+                snap[i] = cur
 
     # -- Time-slicing runner (ADR-003, RG-0015) --
 
@@ -340,8 +402,9 @@ class IOBridgeWeb:
         from applesoft.interpreter import YieldSignal, InputRequestSignal
         from applesoft.errors import BasicError
 
+        # Aborted by RESET (or similar) — caller already cleaned up + showed
+        # the prompt. Silent return avoids printing a duplicate `]`.
         if not self._running:
-            self._finish_execution()
             return
 
         try:
@@ -366,11 +429,11 @@ class IOBridgeWeb:
         self._input_resume_line = inp.line_num
         self._input_resume_idx = inp.stmt_idx
 
+        self._console_cursor.classList.remove("cursor-hidden")
         if inp.kind == "input":
             self._console_input.value = ""
-            self._console_input.focus()
-        elif inp.kind == "get":
-            self._console_input.focus()
+            self._console_input_display.textContent = ""
+        self._console_input.focus()
 
     def _receive_input_value(self, value):
         """Process received input value and resume execution."""
@@ -400,7 +463,7 @@ class IOBridgeWeb:
         """Clean up after program execution ends."""
         self._running = False
         self._waiting_for_input = False
-        self.print_str("]")
+        self._show_prompt("]")
 
     # -- Event handlers --
 
@@ -414,7 +477,7 @@ class IOBridgeWeb:
                     self._waiting_for_input = False
                     self.print_str("^C\n")
                     self._running = False
-                    self.print_str("]")
+                    self._show_prompt("]")
 
     def _on_keydown(self, event):
         """Handle keydown events on the console input field."""
@@ -425,7 +488,7 @@ class IOBridgeWeb:
                 self._waiting_for_input = False
                 self.print_str("^C\n")
                 self._running = False
-                self.print_str("]")
+                self._show_prompt("]")
             return
 
         if len(event.key) == 1:
@@ -443,7 +506,11 @@ class IOBridgeWeb:
             event.preventDefault()
             line = self._console_input.value
             self._console_input.value = ""
+            self._console_input_display.textContent = ""
+            # The prompt is already part of the output flow — only commit the
+            # typed text + newline. Cursor follows naturally on the next line.
             self.print_str(line + "\n")
+            self._hide_prompt()
 
             if self._waiting_for_input and self._input_kind == "input":
                 self._receive_input_value(line)
@@ -465,65 +532,60 @@ class IOBridgeWeb:
         except Exception as e:
             self.print_str("?ERROR: " + str(e) + "\n")
 
-        self.print_str("]")
+        self._show_prompt("]")
 
     # -- STOP button handler --
 
     def _on_stop_click(self, event):
-        """Handle STOP button click (CA-UC-025-05)."""
+        """Handle STOP button click — same effect as Ctrl+C (CA-UC-025-05)."""
         self.set_interrupted()
         if self._waiting_for_input:
             self._waiting_for_input = False
             self.print_str("^C\n")
             self._running = False
-            self.print_str("]")
+            self._show_prompt("]")
+
+    def _on_reset_click(self, event):
+        """RESET button — full reboot, like Apple ][ power-cycle.
+
+        Aborts any running program, clears program + variables (`NEW`),
+        exits graphics mode, blanks the screen, and prints the iconic
+        boot banner.
+        """
+        if not hasattr(self, "_repl") or self._repl is None:
+            return
+        # Cut any in-flight slice — _resume_slice will see _running=False
+        # and bail silently, so we own the prompt redraw below.
+        self.set_interrupted()
+        self._running = False
+        self._waiting_for_input = False
+        try:
+            self._repl._process_line("NEW")
+        except Exception:
+            pass
+        if hasattr(self._repl, "graphics"):
+            self._repl.graphics.text()
+        self._hide_canvas()
+        self._invalidate_canvas_cache()
+        self.clear_screen()
+        self._console_input.value = ""
+        # Cosmetic boot banner — homage to the original power-on sequence.
+        self.print_str("APPLE ][\n\n")
+        self._show_prompt("]")
 
     # -- Initialization --
 
     def _bind_toolbar(self):
-        """Bind toolbar buttons to actions."""
-        document["btn-stop"].bind("click", self._on_stop_click)
-
-        def on_run(event):
-            if hasattr(self, "_repl") and self._repl is not None:
-                if self._running:
-                    self._running = False
-                    self._waiting_for_input = False
-                self._run_program_sliced("RUN")
-
-        document["btn-run"].bind("click", on_run)
-
-        def on_reset(event):
-            if hasattr(self, "_repl") and self._repl is not None:
-                if self._running:
-                    self._running = False
-                    self._waiting_for_input = False
-                self._repl._process_line("NEW")
-                self.clear_screen()
-                self.print_str("]")
-
-        document["btn-reset"].bind("click", on_reset)
-
-        def on_list(event):
-            if hasattr(self, "_repl") and self._repl is not None:
-                self._repl._process_line("LIST")
-                self.print_str("]")
-
-        document["btn-list"].bind("click", on_list)
-
-        def on_save(event):
-            if hasattr(self, "_repl") and self._repl is not None:
-                content = self._repl.interpreter.program.detokenize_all()
-                self.export_file("program", content)
-
-        document["btn-save"].bind("click", on_save)
-
+        """Bind LOAD / STOP / RESET toolbar buttons. Other commands
+        (RUN, LIST, SAVE, NEW…) are typed at the prompt, Apple II-style."""
         self._setup_file_import()
 
         def on_load(event):
             self._file_input.click()
 
         document["btn-load"].bind("click", on_load)
+        document["btn-stop"].bind("click", self._on_stop_click)
+        document["btn-reset"].bind("click", self._on_reset_click)
 
         self._setup_drag_drop()
 
@@ -546,7 +608,45 @@ def init():
         repl = REPL(io=io, debug=debug)
         io._repl = repl
 
-        repl.interpreter.set_yield_threshold(1000)
+        # Shorter slices = more frequent browser repaints between tranches.
+        # 200 instructions ≈ 200-1000 ms in Brython on tight PLOT loops.
+        repl.interpreter.set_yield_threshold(200)
+
+        # Wire the graphics engine to the canvas — overrides the ANSI/stdout
+        # renderer installed by REPL._setup_graphics_render (used by the CLI).
+        # Strategy: while a BASIC slice runs synchronously the browser cannot
+        # repaint, so calling fillRect inside on_draw is wasted CPU. Instead
+        # we just mark the canvas dirty and schedule ONE render via
+        # requestAnimationFrame; it fires between slices, right before the
+        # browser paints. Result: at most one canvas render per displayed frame.
+        gfx_state = {"dirty": False, "scheduled": False, "last_mode": None}
+
+        def _do_render(_ts):
+            gfx_state["scheduled"] = False
+            if not gfx_state["dirty"]:
+                return
+            gfx_state["dirty"] = False
+            gfx = repl.graphics
+            mode = gfx.mode
+            if mode != gfx_state["last_mode"]:
+                io._invalidate_canvas_cache()
+                gfx_state["last_mode"] = mode
+            if mode == "lores":
+                io._show_canvas(280, 192)
+                io.render_lores(gfx.lores_buffer)
+            elif mode == "hires":
+                io._show_canvas(280, 192)
+                io.render_hires(gfx.hires_buffer)
+            elif mode == "text":
+                io._hide_canvas()
+
+        def _web_on_draw():
+            gfx_state["dirty"] = True
+            if not gfx_state["scheduled"]:
+                gfx_state["scheduled"] = True
+                window.requestAnimationFrame(_do_render)
+
+        repl.graphics.set_on_draw(_web_on_draw)
     except Exception as e:
         io.print_str("Error initializing REPL: " + str(e) + "\n")
 
@@ -555,8 +655,7 @@ def init():
     loading = document["loading-overlay"]
     loading.classList.add("hidden")
 
-    io.print_str("]")
-    io._console_input.focus()
+    io._show_prompt("]")
 
 
 init()

@@ -93,30 +93,82 @@ html, body {
 /* ------------------------------------------------------------------ */
 .toolbar {
     display: flex;
-    gap: 4px;
-    padding: 6px 16px;
+    gap: 12px;
+    padding: 10px 16px 12px 16px;
     background-color: var(--toolbar-bg);
     border-bottom: var(--panel-border);
     flex-wrap: wrap;
+    align-items: center;
 }
 
+/* Apple II-style keycaps: beige plastic, slight inset highlight,
+   3D drop-shadow that compresses when pressed.                    */
 .toolbar-btn {
     font-family: var(--font-apple2);
     font-size: 13px;
-    color: var(--fg-green);
-    background-color: var(--btn-bg);
-    border: 1px solid #555;
-    padding: 4px 12px;
+    font-weight: bold;
+    color: #1a1a1a;
+    background-color: #d4c5a0;
+    border: 1px solid #6b5d3a;
+    border-radius: 6px;
+    padding: 7px 18px;
     cursor: pointer;
-    transition: background-color 0.15s;
+    box-shadow: 0 3px 0 #6b5d3a, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    min-width: 76px;
+    text-align: center;
+    transition: transform 0.05s ease, box-shadow 0.05s ease,
+                background-color 0.1s ease;
 }
 
 .toolbar-btn:hover {
-    background-color: var(--btn-hover);
+    background-color: #e2d4ad;
 }
 
 .toolbar-btn:active {
-    background-color: var(--btn-active);
+    transform: translateY(3px);
+    box-shadow: 0 0 0 #6b5d3a, inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* STOP — amber warning */
+.toolbar-btn.btn-stop {
+    background-color: #f4c842;
+    border-color: #8a6a14;
+    box-shadow: 0 3px 0 #8a6a14, inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+.toolbar-btn.btn-stop:hover { background-color: #f8d56a; }
+.toolbar-btn.btn-stop:active {
+    box-shadow: 0 0 0 #8a6a14, inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* RESET — homage to the Apple ][+ Reset key (1979): a single bright red
+   moulded plastic keycap, isolated at the top-right of the keyboard. */
+.toolbar-btn.btn-reset {
+    background-color: #c8242a;
+    color: #fff;
+    border-color: #5a0e0e;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.5);
+    box-shadow:
+        0 3px 0 #5a0e0e,
+        inset 0 2px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+    /* Push RESET to the right edge — same spatial separation as on the real
+       Apple ][ keyboard, where the Reset key sat alone in the top-right. */
+    margin-left: auto;
+}
+.toolbar-btn.btn-reset:hover {
+    background-color: #db3035;
+    box-shadow:
+        0 3px 0 #5a0e0e,
+        0 0 14px rgba(200, 36, 42, 0.55),
+        inset 0 2px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+}
+.toolbar-btn.btn-reset:active {
+    box-shadow:
+        0 0 0 #5a0e0e,
+        inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 /* ------------------------------------------------------------------ */
@@ -163,39 +215,49 @@ html, body {
     max-width: var(--col-width-80);
 }
 
-.console-input-line {
-    display: flex;
-    align-items: center;
-    padding: 2px 8px 8px 8px;
-    background-color: var(--bg);
-}
-
-.console-prompt {
+.console-input-display {
     color: var(--fg-green);
     font-family: var(--font-apple2);
     font-size: 16px;
     white-space: pre;
 }
 
-.console-input {
-    flex: 1;
-    background-color: transparent;
+/* Blinking block cursor — authentic Apple II look.
+ * The cursor is a non-breaking space styled with an inverse-video background,
+ * so it inherits the exact character-cell metrics (no alignment drift). */
+.console-cursor {
+    background-color: var(--fg-green);
     color: var(--fg-green);
-    font-family: var(--font-apple2);
-    font-size: 16px;
-    border: none;
+    animation: blink-block 0.5s step-end infinite;
+}
+
+.console-cursor.cursor-hidden {
+    visibility: hidden;
+}
+
+@keyframes blink-block {
+    50% { background-color: transparent; }
+}
+
+/* Invisible capture input — keeps focus & receives keystrokes.
+ * On-screen at (0,0) with zero size + opacity 0 so focus() does NOT trigger
+ * a scroll-into-view that would reveal it (the off-screen pattern fails here). */
+.console-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    color: transparent;
+    caret-color: transparent;
     outline: none;
-    caret-color: var(--fg-green);
-}
-
-/* Blinking cursor effect for the console */
-.console-input:focus {
-    border-bottom: 2px solid var(--fg-green);
-    animation: blink-cursor 1s step-end infinite;
-}
-
-@keyframes blink-cursor {
-    50% { border-bottom-color: transparent; }
+    overflow: hidden;
 }
 
 /* Canvas panel (hidden by default) */
@@ -207,6 +269,14 @@ html, body {
     background-color: var(--bg);
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    width: 560px;
+    height: 384px;
+    display: block;
+    margin: 8px auto;
+}
+
+.canvas-panel {
+    padding: 8px;
 }
 
 /* ------------------------------------------------------------------ */
