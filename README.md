@@ -52,6 +52,9 @@ Quelques classiques pédagogiques sont fournis dans `examples/` :
 |---|---|
 | `RASKIN1.BAS` | Mosaïque aléatoire originale de Jeff Raskin (sémantique Integer BASIC) |
 | `RASKIN2.BAS` | Adaptation Applesoft stricte (`INT(RND(1)*N)`) qui produit la mosaïque colorée attendue |
+| `PGCD.BAS` | PGCD par algorithme d'Euclide (méthode des soustractions modulaires) |
+| `ROT.BAS` | Étoile rotative HGR — démonstration `COS`/`SIN` + `DEF FN` |
+| `SYSEQ.BAS` | Résolution d'un système d'équations linéaires (2 à 4 inconnues) — méthode des additions / pivot de Gauss, animation pas à pas |
 | `SIEVE.BAS` | Crible d'Ératosthène |
 | `HGRCHART.BAS` | Charte 8×8 des couleurs HGR (Apple II Reference Manual) |
 | `HGRDEMO.BAS` | Cadre + diagonales avec interaction utilisateur (`devonhubner.org`) |
@@ -59,13 +62,17 @@ Quelques classiques pédagogiques sont fournis dans `examples/` :
 
 Pour les charger dans le navigateur : bouton **LOAD** ; en CLI : `LOAD "<chemin>"` au prompt.
 
+### À propos de l'exemple Raskin
+
+**Jeff Raskin** (1943–2005), à l'origine du projet Macintosh chez Apple, a publié dans les premières documentations Apple II un court programme « pédagogique » de mosaïque aléatoire qui boucle sur `COLOR= RND(16) : PLOT RND(40),RND(40)`. Le programme tel que publié n'a jamais marché en **Applesoft** : il suppose la sémantique d'**Integer BASIC** où `RND(N)` retourne un entier aléatoire dans `[0,N)`, alors qu'en Applesoft `RND(1)` retourne un flottant `[0,1)` indépendant de son argument. Sur Apple II avec Applesoft, le programme original (`RASKIN1.BAS`) trace donc des points en couleur 0 à la position (0,0) en boucle — un seul pixel noir, pas la mosaïque attendue. La version corrigée (`RASKIN2.BAS`) explicite la conversion `INT(RND(1) * N)` et produit la mosaïque colorée illustrée plus haut. Ce bug subtil dans un exemple « officiel » a été cité par plusieurs vétérans Apple II comme l'archétype des écueils sémantiques entre dialectes BASIC.
+
 ## Documentation
 
 Le projet suit la méthodologie SDD avec une chaîne de documents structurée :
 
 | Document | Rôle |
 |---|---|
-| [`docs/SPEC-racine-ApplesoftBasicEmu.md`](docs/SPEC-racine-ApplesoftBasicEmu.md) | Spécification SDD racine — 28 UC, 15 RG, 5 ENF, critères d'acceptation `CA-UC-XXX-YY` (v3.0) |
+| [`docs/SPEC-racine-ApplesoftBasicEmu.md`](docs/SPEC-racine-ApplesoftBasicEmu.md) | Spécification SDD racine — 28 UC, 15 RG, 5 ENF, critères d'acceptation `CA-UC-XXX-YY` (v3.1) |
 | [`docs/SPEC-extension-ApplesoftBasicEmu-LookAppleII.md`](docs/SPEC-extension-ApplesoftBasicEmu-LookAppleII.md) | Extension fonctionnelle (préfixe `FID`) — fidélité visuelle web, tolérance lexicale, perf graphique (v1.0) |
 | [`docs/GRAMMAR.md`](docs/GRAMMAR.md) | Grammaire EBNF complète d'Applesoft BASIC |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Architecture détaillée — 14 composants, 7 ADR, pipeline Lexer→Parser→Interpreter (v1.1) |
